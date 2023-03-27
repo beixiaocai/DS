@@ -1,0 +1,18 @@
+﻿# clion
+.idea/
+cmake-build-debug/*
+build/*
+
+# vs
+.vs
+windows/x64/*
+windows/.vs
+
+# qt
+
+DS.pro.user*
+
+
+
+
+

@@ -1,0 +1,16 @@
+﻿QMenu {
+    background-color:rgb(246,247,251);
+    border: 3px solid rgb(246,247,251);
+}
+QMenu::item {
+    color: rgb(0,0,0);
+    padding:1px 4px;
+    margin:1px 10px;
+}
+QMenu::item:selected {
+    color:rgb(64,65,66);
+}
+QMenu::item:pressed {
+    color: rgb(56,75,113);
+}
+

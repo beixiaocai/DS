@@ -1,0 +1,288 @@
+﻿"use strict";
+
+const MCONSTANT_RADIO_SINGLE = "radio_single";
+const MCONSTANT_RADIO_FIXED = "radio_fixed";
+const MCONSTANT_RADIO_UNFIXED = "radio_unfixed";
+const MCONSTANT_RADIO_SITEADDRESS = "radio_siteaddress";
+const SEPARATOR_WEBDATA_ARRAY = ",r#,";/*c++与网页交互，对象与对象之间的分隔符*/
+const SEPARATOR_WEBDATA_ATTR = "*r#*"; /*c++与网页交互，对象内属性间的分隔符*/
+
+var tempScrollHeight = 0;
+var tempScrollTop = 0;
+let tempLoopClickNodes = null;
+let tempLoopExtractNodes = null;
+function b64Encode (str) {
+    return btoa(encodeURIComponent(str));
+};
+
+let helpCalcuLoopSameNodes = function(loopXpath){
+    let sameNodes = [];
+    try {
+        let node = document.evaluate(loopXpath,document,null,XPathResult.ANY_TYPE,null).iterateNext();
+        let nodeName = node.nodeName;
+
+        let brotherNodes = node.parentNode.childNodes;
+
+        for (let j = 0; j < brotherNodes.length; j++) {
+            if (brotherNodes[j].nodeName == nodeName) {
+                sameNodes.push(brotherNodes[j]);
+            }
+        }
+    }catch (e) {
+        console.log("获取循环元素的数量失败 ：",e);
+    }
+    console.log("获取循环元素的数量",sameNodes.length);
+    return sameNodes;
+};
+let helpCalcuRelativeXpath = function(loopXpath,nodeXpath){
+    /*根据循环xpath路径 和 元素xpath绝对路径，计算元素xpath路径相对于循环xpath路径的相对路径*/
+    let relativeXpath;
+    if (nodeXpath.startsWith(loopXpath)) {
+        relativeXpath = nodeXpath.replace(loopXpath, "");
+    }
+    if (relativeXpath.startsWith("[")) {
+        relativeXpath = relativeXpath.slice(relativeXpath.indexOf("]") + 2);
+    }
+    return relativeXpath;
+};
+let helpClick = function(isNode,val,b_isNewTab,remark){
+    try {
+        let node = val;
+        if(!isNode){
+            node = document.evaluate(val,document,null,XPathResult.ANY_TYPE,null).iterateNext();
+        }
+        if(node!=null){
+            if(b_isNewTab){
+                if("A"==node.nodeName && node.getAttribute("href")){
+                    window.open(node.getAttribute("href"));
+                    return "success:wait100,a标签打开新窗口"+remark;
+                }else{
+                    node.click(); /*一定要实现新标签打开，否则会导致出错*/
+                    return "success:wait100,非a标签打开新窗口"+remark;
+                }
+            }else {/*非新窗口打开*/
+                if("A"==node.nodeName && node.getAttribute("href")){
+                    window.location.replace(node.getAttribute("href"));
+                    return "success:wait100,页面内点击a标签"+remark;
+                }else{
+                    node.click();/*页面内执行该点击，可能会导致，下一步操作基于上一步对应的网页。需要考虑加延时*/
+                    return "success:wait100,页面内点击非a标签"+remark;
+                }
+            }
+        }else {
+            return "error:点击元素不存在";
+        }
+    }catch (e) {
+        return "error:" + String(e) +remark;
+    }
+};
+let helpExtract = function(node,loopTypeValue,extractFields,remark) {
+    console.log("* helpExtract ",node,loopTypeValue,extractFields,remark);
+    let values = [];
+    try {
+        let fieldList = extractFields.split(SEPARATOR_WEBDATA_ARRAY);
+        for (let i = 0; i < fieldList.length; i++) {
+            try {
+                let fieldAttrs = fieldList[i].split(SEPARATOR_WEBDATA_ATTR);
+                let fieldXpath = fieldAttrs[0];
+                let fieldName = fieldAttrs[1];
+                let fieldActionMethod = fieldAttrs[2];
+                let extractNode = null;
+                if(node==null){/*单独提取时，无相对xpath，只能通过字段的绝对xpath提取内容*/
+                    extractNode = document.evaluate(fieldXpath, document, null, XPathResult.ANY_TYPE, null).iterateNext();
+                }else {
+                    extractNode = node;
+                    let relativeXpath = helpCalcuRelativeXpath(loopTypeValue,fieldXpath);
+                    if(relativeXpath!=""){
+                        extractNode = document.evaluate(relativeXpath, extractNode, null, XPathResult.ANY_TYPE, null).iterateNext();
+                    }
+                }
+                let fieldValue;
+                if("text"==fieldActionMethod){
+                    fieldValue=extractNode.innerText;
+                }else if("innerHTML"==fieldActionMethod){
+                    fieldValue=extractNode.innerHTML;
+                }else if("outerHTML"==fieldActionMethod){
+                    fieldValue=extractNode.outerHTML;
+                }else if("value"==fieldActionMethod){
+                    /*input标签特有*/
+                    fieldValue = extractNode.value;
+                }else {
+                    fieldValue=extractNode.getAttribute(fieldActionMethod);
+                }
+                values.push(fieldName+SEPARATOR_WEBDATA_ATTR+fieldValue);
+            }catch (e) {
+                console.log(String(e),node,fieldList[i],remark);
+            }
+        }
+    }catch (e) {
+        console.log(String(e),node,remark);
+    }
+    return "success:"+values.join(SEPARATOR_WEBDATA_ARRAY);
+};
+
+let startRoll = function(rollCount,rollInterval,rollTypeIndex){
+
+    console.log("startRoll rollCount(滚动次数),rollInterval(滚动间隔 s),rollTypeIndex(滚动方式) ",rollCount,rollInterval,rollTypeIndex);
+
+    if(parseInt(rollTypeIndex)==0){/*0:直接滚动到底部*/
+        let scrollHeight = document.body.scrollHeight;/*网页全文的高度，包括伸缩*/
+        let scrollTop = document.body.scrollTop;
+        console.log("上一次滚动的值",tempScrollHeight,tempScrollTop);
+        console.log("当前滚动的值",scrollHeight,scrollTop);
+
+        if(scrollHeight>tempScrollHeight){
+            window.scrollTo(0,scrollHeight);
+
+            tempScrollHeight = scrollHeight;
+            tempScrollTop = scrollTop;
+            return "success:next";
+        }else {
+            return "success:bottom";
+        }
+
+    }else if(parseInt(rollTypeIndex)==1){/*1:向下滚动一屏*/
+                let clientHeight = document.body.clientHeight;/*网页可见区域的高度*/
+                console.log(clientHeight);
+                window.scrollTo(0,clientHeight);
+
+                return "success:bottom";
+    }
+    return "success:bottom";
+};
+let startClickEle = function(loopTypeName,loopTypeValue,eleNumber,eleXpath,eleText,isLoop,isNewTab,isLast,isTurnPage){
+
+    console.log("startClickEle start......",loopTypeName,loopTypeValue,eleNumber,eleXpath,eleText,isLoop,isNewTab,isLast,isTurnPage);
+
+    let b_isLoop = parseInt(isLoop)==1?true:false;
+    let b_isNewTab = parseInt(isNewTab)==1?true:false;
+
+    if (b_isLoop) {
+        if (MCONSTANT_RADIO_SINGLE == loopTypeName) {
+            if(parseInt(isLast)==1){
+                if(parseInt(isTurnPage)==1){/*翻页*/
+                                        try {
+                                                  let node = document.evaluate(eleXpath,document,null,XPathResult.ANY_TYPE,null).iterateNext();
+                                                  if(node.textContent==eleText){
+                                                          node.click();
+                                                          if("A"==node.nodeName){
+                                                                  return "success:wait100,next";
+                                                          }else{
+                                                                  return "success:wait300,next";
+                                                          }
+                                                  }else{
+                                                          let sameNodes = node.parentNode.childNodes;
+
+                                                          for (var i = 0; i < sameNodes.length; i++) {
+                                                                  let sameNode = sameNodes[i];
+                                                                  if(sameNode.textContent==eleText){
+                                                                                sameNode.click();
+                                                                                if("A"==sameNode.nodeName){
+                                                                                        return "success:wait100,next";
+                                                                                }else{
+                                                                                        return "success:wait300,next";
+                                                                                }
+                                                                   }
+                                                          }
+                                                          return "success:wait300,[循环翻页失败，翻页元素不一致] ";
+                                                  }
+                                        }catch (e) {
+                                                  return "success:wait300,[循环翻页失败] "+String(e);
+                                        }
+
+                }else{/*下拉刷新*/
+                    return "success:dropdown,[单元素循环+最后一步点击+不翻页=点击不存在+存在下拉刷新]";
+                }
+            }else{
+                return helpClick(false,eleXpath,b_isNewTab,"[单元素循环+不满足翻页类型=常规点击]");
+            }
+        } else if (MCONSTANT_RADIO_SITEADDRESS== loopTypeName) {
+
+            return helpClick(false,eleXpath,b_isNewTab,"[网址列表循环+任意步骤=常规点击]");
+
+        } else {
+            let remark = "[固定非固定循环+任意步骤=常规点击]";
+            try {
+                if(tempLoopClickNodes==null || eleNumber==1){
+                    tempLoopClickNodes= helpCalcuLoopSameNodes(loopTypeValue);
+                }
+                let node = tempLoopClickNodes[eleNumber - 1];
+                let relativeXpath = helpCalcuRelativeXpath(loopTypeValue,eleXpath);
+
+                if(relativeXpath!=""){
+                    node= document.evaluate(relativeXpath,node, null, XPathResult.ANY_TYPE, null).iterateNext();
+                }
+                return helpClick(true,node,b_isNewTab,remark);
+            }catch (e) {
+                return "error:" + String(e) +remark;
+            }
+
+        }
+    }else {
+        return helpClick(false,eleXpath,b_isNewTab,"[非循环+任意步骤=常规点击]");
+    }
+};
+let startLoopHead = function (loopTypeName,loopTypeValue) {
+    console.log("startLoopHead start..........",loopTypeName,loopTypeValue);
+    try {
+        let sameNodes = helpCalcuLoopSameNodes(loopTypeValue);
+        return "success:"+sameNodes.length;
+    }catch (e) {
+        return "error:executeLoopHead获取循环周期失败="+String(e);
+    }
+};
+let startExtract = function(loopTypeName,loopTypeValue,eleNumber,isLoop,extractFields) {
+    console.log("startExtract start......",loopTypeName,loopTypeValue,eleNumber,isLoop,extractFields);
+    let b_isLoop = parseInt(isLoop)==1?true:false;
+    if (b_isLoop){
+        if (MCONSTANT_RADIO_SINGLE == loopTypeName) {
+            return helpExtract(null,null,extractFields,"[单元素循环=单独提取]");
+        } else if (MCONSTANT_RADIO_SITEADDRESS == loopTypeName) {
+            return helpExtract(null,null,extractFields,"[网址列表循环=单独提取]");
+        }else {
+            if(tempLoopExtractNodes==null || eleNumber==1){
+                tempLoopExtractNodes = helpCalcuLoopSameNodes(loopTypeValue);
+            }
+            let node = tempLoopExtractNodes[eleNumber - 1];
+            return helpExtract(node,loopTypeValue,extractFields,"[固定非固定循环=循环提取]");
+        }
+    }else {
+        return helpExtract(null,null,extractFields,"[非循环=单独提取]");
+    }
+};
+let startInput = function (loopTypeName,loopTypeValue,eleNumber,eleXpath,text,isLoop) {
+    /*loopTypeName,loopTypeValue,eleNumber,isLoop v0.01版本均不使用*/
+    try {
+        let node = document.evaluate(eleXpath,document,null,XPathResult.ANY_TYPE,null).iterateNext();
+
+        /*let ef = document.createEvent("MouseEvents");ef.initEvent("focus", true, true);node.dispatchEvent(ef);*/
+        let ekd = new KeyboardEvent("keydown");
+        let eku = new KeyboardEvent("keyup");
+        node.focus();
+        node.dispatchEvent(ekd);
+        node.value = text;
+        node.dispatchEvent(eku);
+
+        return  "success:";
+    }catch (e) {
+        return "error:" + String(e);
+    }
+};
+let startMouse = function (loopTypeName,loopTypeValue,eleNumber,eleXpath,isLoop) {
+    /*loopTypeName,loopTypeValue,eleNumber,isLoop v0.01版本均不使用*/
+    try {
+        let node = document.evaluate(eleXpath,document,null,XPathResult.ANY_TYPE,null).iterateNext();
+
+        let eo = document.createEvent("MouseEvents");
+        eo.initEvent("mouseover", true, true);
+        node.dispatchEvent(eo);
+
+        return  "success:";
+    }catch (e) {
+        return "error:" + String(e);
+    }
+};
+
+function injectJavascriptCheck() {
+    return "success";
+};

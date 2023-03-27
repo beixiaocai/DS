@@ -1,0 +1,583 @@
+﻿const SEPARATOR_WEBDATA_ARRAY = ",r#,";
+const SEPARATOR_WEBDATA_ATTR = "*r#*";
+
+function MMap() {
+  var obj = {};
+  this.set = function(key, value) {
+        obj[key] = value;
+  };
+
+  this.size = function() {
+        var count = 0;
+        for(var attr in obj) {
+          count++;
+        }
+        return count;
+  };
+
+  this.get = function(key) {
+        if(obj[key] || obj[key] === 0 || obj[key] === false) {
+          return obj[key];
+        } else {
+          return null;
+        }
+  };
+
+  this.has = function(key) {
+        if(obj[key] || obj[key] === 0 || obj[key] === false) {
+          return true;
+        } else {
+          return false;
+        }
+  };
+
+  this.delete = function(key) {
+        if(obj[key] || obj[key] === 0 || obj[key] === false) {
+          delete obj[key];
+        }
+  };
+
+  this.forEach = function(callBack) {
+        for(var attr in obj) {
+          callBack(obj[attr],attr);
+        }
+  };
+};
+
+
+let cssCode = document.createElement("style");
+cssCode.appendChild(document.createTextNode(".my-mouseover{background-color: #9ADCFA !important;} " +
+        ".my-click-self{ background-color:rgb(229,245,233) !important; border-left: 1px solid rgb(60,179,173) !important;border-top: 1px solid rgb(60,179,173) !important;}" +
+        ".my-click-sameType{ !important;background-color:rgba(220,20,60,0.2) !important;border-left: 1px solid rgb(220,20,60) !important;border-top: 1px solid rgb(220,20,60) !important;}" +
+        ".my-click-render{background-color:rgba(220,20,60,0.1) !important;}"));
+document.head.appendChild(cssCode);
+let supportLabels = ["LI","TR","DIV","SPAN","A","P","H1","H2","H3"];
+let checkLabel = function(label) {
+        let legal = false;
+        for (let i = 0; i < supportLabels.length; i++) {
+                if(supportLabels[i]==label){
+                        legal = true;break;
+                }
+        }
+        return legal;
+};
+
+class eleBackground {
+        static setMouseOverBackground(ele){
+                ele.target.classList.add("my-mouseover");
+        }
+        static setMouseOutBackground(ele){
+                ele.target.classList.remove("my-mouseover");
+        }
+        static setClickSelfBackgroundChange(node) {
+                try {
+                        let nodeClass = node.classList;
+                        nodeClass.remove("my-click-render");
+                        nodeClass.remove("my-click-sameType");
+                        let className = node.className;
+                        if(className.indexOf("my-click-self")==-1) {
+                                nodeClass.add("my-click-self");
+                        }
+                }catch(e){
+                        console.log("setClickSelfBackgroundChange",node,e);
+                }
+        }
+        static setClickSameTypeBackgroundChange(node){
+                try {
+                        if(node!=null){
+                                let nodeClass = node.classList;
+                                nodeClass.remove("my-click-render");
+                                nodeClass.remove("my-click-self");
+                                let className = node.className;
+                                if(className.indexOf("my-click-sameType")==-1) {
+                                        nodeClass.add("my-click-sameType");
+                                }
+                        }
+                }catch(e){
+                        console.log("setClickSameTypeBackgroundChange",typeof node,node,e);
+                }
+        }
+        static setClickBackgroundNormal(node){
+                try {
+                        if(node!=null) {
+                                let nodeClass = node.classList;
+                                nodeClass.remove("my-click-self");
+                                nodeClass.remove("my-click-sameType");
+                        }
+                }catch (e) {
+                        console.log("setClickBackgroundNormal",node,e);
+                }
+        }
+        static setNeedRenderBackgroundChange(node) {
+                try {
+                        let nodeClass = node.classList;
+                        nodeClass.remove("my-click-sameType");
+                        nodeClass.remove("my-click-self");
+                        let className = node.className;
+                        if(className.indexOf("my-click-render")==-1) {
+                                nodeClass.add("my-click-render");
+                        }
+                }catch(e){
+                        console.log("setNeedRenderBackgroundChange",node,e);
+                }
+        }
+        static setNeedRenderBackgroundNormal(node) {
+                try {
+                        let nodeClass = node.classList;
+                        nodeClass.remove("my-click-sameType");
+                        nodeClass.remove("my-click-self");
+                        nodeClass.remove("my-click-render");
+                }catch(e){
+                        console.log("setNeedRenderBackgroundNormal",node,e);
+                }
+        }
+};
+class SearchClickElements {
+        __backward_search(headXpath,tailXpath){
+                let eleNode = document.evaluate(headXpath,document,null,XPathResult.ANY_TYPE,null).iterateNext();
+                let sameNodes1 = eleNode.parentNode.childNodes;
+                let sameNodes = [];
+                let sameNodeClassNames = [];
+
+                for (let j = 0; j <sameNodes1.length ; j++) {
+                        let currentNode = sameNodes1[j];
+                        if(currentNode!=null  && checkLabel(currentNode.nodeName)){
+                                let f = true;
+                                if(tailXpath!=""){
+                                        f = document.evaluate(tailXpath,currentNode,null,XPathResult.ANY_TYPE,null).iterateNext();
+                                }
+                                if(f){
+                                        sameNodes.push(currentNode);
+                                        sameNodeClassNames.push(currentNode.className);
+                                }
+
+                        }
+                }
+
+                let isSuccess = true;
+                if(sameNodes.length>=3){
+                        let sL = sameNodeClassNames.length;
+                        let compareSameL = 0;
+                        for (let i = 0; i < sL-1; i++) {
+                                if(sameNodeClassNames[i]==sameNodeClassNames[i+1]){
+                                        compareSameL+=1;
+                                }
+                        }
+                        if(compareSameL/sL< 0.5 ){
+                                compareSameL = 0;
+                                for (let i = 0; i < sL-2; i++) {
+                                        if(sameNodeClassNames[i]==sameNodeClassNames[i+2]){
+                                                compareSameL+=1;
+                                        }
+                                }
+                                if(compareSameL/sL< 0.5 ){
+                                        isSuccess = false;
+                                }
+
+                        }
+                }else {
+                        isSuccess = false;
+                }
+                /*console.log("倒退搜索循环元素--",headXpath,",",tailXpath,isSuccess,sameNodes);*/
+                if(isSuccess){
+                        return sameNodes;
+                }else {
+                        return null;
+                }
+        };
+
+        constructor(node,nodeXpath) {
+                this.existLoop = false;
+                let xpathElements = nodeXpath.split("/");
+                let xpathElementsLength = xpathElements.length;
+
+                for (let i = 1; i < xpathElementsLength; i++) {
+                        let frontElements = xpathElements.slice(0,xpathElementsLength-i);
+                        let headXpath = frontElements.join("/");
+                        let lastElement = xpathElements[xpathElementsLength-i];
+                        headXpath = headXpath+"/"+lastElement;
+                        let tailElements = xpathElements.slice(xpathElementsLength-i+1);
+                        let tailXpath = tailElements.join("/");
+
+                        let sameNodes = this.__backward_search(headXpath,tailXpath);
+                        if(sameNodes != null){
+
+
+                                let sameTypeNodes = [];
+                                if(i===1){/*点击的元素即为循环体*/
+                                        for (let j = 0; j <sameNodes.length ; j++) {
+                                                sameTypeNodes.push(sameNodes[j]);
+                                        }
+                                }else{
+                                        for (let j = 0; j <sameNodes.length ; j++) {
+                                                let sameNode = document.evaluate(tailXpath,sameNodes[j],null,XPathResult.ANY_TYPE,null).iterateNext();
+                                                sameTypeNodes.push(sameNode);
+                                        }
+                                }
+                                if(headXpath.endsWith("]")){
+                                        headXpath = headXpath.slice(0,headXpath.lastIndexOf("["));
+                                }
+
+                                this.headXpath= headXpath;
+                                this.tailXpath = tailXpath;
+                                this.sameTypeNodes = sameTypeNodes;
+                                this.existLoop = true;
+
+                                break;
+                        }
+                }
+        };
+};
+class eleParams {
+        static safeTrim(str){
+                try {
+                        return str.trim();
+                }catch (e) {
+                        return str;
+                }
+        }
+        static JoinNode_p2(node,nodeFullXpath,sameTypeLength){
+                let p2Attrs = [];
+                p2Attrs.push(nodeFullXpath);
+                p2Attrs.push(this.getXpath(node));
+                p2Attrs.push(this.getNode_text(node));
+                p2Attrs.push(this.getNode_custom(node));
+                p2Attrs.push(this.safeTrim(node.innerHTML));
+                p2Attrs.push(this.safeTrim(node.outerHTML));
+                p2Attrs.push(sameTypeLength);
+                return p2Attrs.join(SEPARATOR_WEBDATA_ATTR);
+        }
+        static getNode_text(node){
+                let mtext = "undefined";
+                if("A"==node.nodeName){
+                        mtext = node.text;
+                }else if("IMG"==node.nodeName){
+                        mtext = node.getAttribute("src");
+                }else if("INPUT"==node.nodeName){
+                        mtext = node.value;
+                }else {
+                        mtext = node.textContent;
+                }
+                return this.safeTrim(mtext);
+        }
+        static getNode_custom(node){
+                let mcustom = "undefined";
+                try {
+                        if("A"==node.nodeName){
+                                mcustom = node.getAttribute("href");
+                        }else if("IMG"==node.nodeName){
+                                mcustom = node.getAttribute("src");
+                        }else if("INPUT"==node.nodeName){
+                                mcustom = node.value;
+                        }
+                }catch (e) {
+                        console.log("getNode_custom error",e);
+                }
+                return this.safeTrim(mcustom);
+        }
+        static getRandomCode(){
+                let code = "";
+                for (let i=0;i<10;i++){
+                        code +=parseInt(10*Math.random());
+                }
+                return code;
+        }
+        static getXpath(element){
+                if (element.id !== "" && typeof(element.id) !== "undefined" ) {
+                        return "//*[@id=\'"+ element.id+"\']";
+                }
+                if (element.className !== "" && typeof(element.className) !== "undefined" ) {
+                        let nodeClassName = element.className;
+                        let replaceClassArray =["my-mouseover","my-click-self","my-click-sameType","my-click-render"];
+                        for (let i = 0; i < replaceClassArray.length; i++) {
+                                if(nodeClassName.indexOf(replaceClassArray[i])!=-1) {
+                                        nodeClassName = nodeClassName.replace(replaceClassArray[i],"")
+                                }
+                        }
+                        nodeClassName = eleParams.safeTrim(nodeClassName);
+                        if(nodeClassName!=""){
+                                return "//"+element.nodeName+"[@class=\'"+nodeClassName +"\']";
+                        }
+                }
+                if (element == document.body) {
+                        return "/html/" + element.tagName.toLowerCase();
+                }
+                var ix = 1;
+                var siblings = element.parentNode.childNodes;
+                for (var i = 0, l = siblings.length; i < l; i++) {
+                        var sibling = siblings[i];
+                        if (sibling == element) {
+                                return this.getXpath(element.parentNode) + "/" + element.tagName.toLowerCase() + "[" + (ix) + "]";
+
+                        } else if (sibling.nodeType == 1 && sibling.tagName == element.tagName) {
+                                ix++;
+                        }
+                }
+        }
+        static getFullXpath(element){
+                if (element == document.body) {
+                        return "/html/" + element.tagName.toLowerCase();
+                }
+                var ix = 1;
+                var siblings = element.parentNode.childNodes;
+                for (var i = 0, l = siblings.length; i < l; i++) {
+                        var sibling = siblings[i];
+                        if (sibling == element) {
+                                return this.getFullXpath(element.parentNode) + "/" + element.tagName.toLowerCase() + "[" + (ix) + "]";
+                        } else if (sibling.nodeType == 1 && sibling.tagName == element.tagName) {
+                                ix++;
+                        }
+                }
+        }
+};
+let clickNodeCodeAndNodeMap = new MMap();
+let clickNodeAndSameTypeNodesMap = new MMap();
+let currentClickNode = null;
+
+let currentNeedRenderNodes = [];
+
+let setNeedRenderChange = function(){
+        for (let i =0;i<currentNeedRenderNodes.length;i++){
+                eleBackground.setNeedRenderBackgroundChange(currentNeedRenderNodes[i]);
+        }
+};
+let setNeedRenderNormal = function(){
+        for (let i =0;i<currentNeedRenderNodes.length;i++){
+                eleBackground.setNeedRenderBackgroundNormal(currentNeedRenderNodes[i]);
+        }
+        currentNeedRenderNodes = [];
+};
+let setAllRenderCancel = function(isRender){
+        clickNodeAndSameTypeNodesMap.forEach((_sameTypeNodes,_node,self)=>{
+                for (let i=0;i<_sameTypeNodes.length;i++){
+                        eleBackground.setClickBackgroundNormal(_sameTypeNodes[i]);
+                }
+                clickNodeAndSameTypeNodesMap.delete(_node);
+        });
+        clickNodeCodeAndNodeMap.forEach((_node,_code,self)=>{
+                clickNodeCodeAndNodeMap.delete(_code);
+        });
+        currentClickNode = null;
+
+        if(isRender){
+                setNeedRenderChange();
+        }else {
+                setNeedRenderNormal();
+        }
+};
+
+let smartAlertOpenWeb = function(url){
+        window.location.href = url;
+};
+
+let smartAlertClickEle = function(nodeCode,eleXpath){
+        console.log("smartAlertClickEle ",nodeCode,eleXpath);
+        let node = null;
+        if(clickNodeCodeAndNodeMap.has(nodeCode)){
+                node = clickNodeCodeAndNodeMap.get(nodeCode);
+        }else{
+                node = document.evaluate(eleXpath,document,null,XPathResult.ANY_TYPE,null).iterateNext();
+        }
+        if(node!=null){
+                let oldstyle = node.getAttribute("style");
+                if(!oldstyle){oldstyle = "";}
+
+                node.setAttribute("style","mcClick:true;"+oldstyle);
+
+                try {
+                        if(clickNodeCodeAndNodeMap.has(nodeCode)){
+                                clickNodeCodeAndNodeMap.delete(nodeCode);
+                        }
+                        currentClickNode = null;
+                        currentNeedRenderNodes.push(node);
+                        setNeedRenderChange();
+                }catch (e) {
+                        console.log("smartAlertClickEle[目标元素不在clickNodeCodeAndNodeMap中，不需要清除]");
+                }
+                node.click();
+        }else {
+                console.log("smartAlertClickEle：无exeXpath对应元素")
+        }
+
+};
+let smartAlertExtract = function(nodeCode){
+        let node = clickNodeCodeAndNodeMap.get(nodeCode);
+        let sameTypeNodes = clickNodeAndSameTypeNodesMap.get(node);
+
+        for (let i = 0; i < sameTypeNodes.length; i++) {
+                eleBackground.setClickBackgroundNormal(sameTypeNodes[i]);
+        }
+
+        clickNodeCodeAndNodeMap.delete(nodeCode);
+        currentClickNode = null;
+        currentNeedRenderNodes.push(node);
+        setNeedRenderChange();
+
+};
+let smartAlertInput = function(nodeCode,text){
+        let node = clickNodeCodeAndNodeMap.get(nodeCode);
+        /*模拟发送键盘按下和松开事件*/
+        let ekd = new KeyboardEvent("keydown");
+        let eku = new KeyboardEvent("keyup");
+        node.focus();
+        node.dispatchEvent(ekd);
+        node.value = text;
+        node.dispatchEvent(eku);
+
+
+        let sameTypeNodes = clickNodeAndSameTypeNodesMap.get(node);
+
+        for (let i = 0; i < sameTypeNodes.length; i++) {
+                eleBackground.setClickBackgroundNormal(sameTypeNodes[i]);
+        }
+
+        clickNodeCodeAndNodeMap.delete(nodeCode);
+        currentClickNode = null;
+        currentNeedRenderNodes.push(node);
+        setNeedRenderChange();
+
+};
+let smartAlertMouse = function(nodeCode){
+
+        let node = clickNodeCodeAndNodeMap.get(nodeCode);
+        /*模拟发送鼠标over事件*/
+        let eo = document.createEvent("MouseEvents");
+        eo.initEvent("mouseover", true, true);
+        node.dispatchEvent(eo);
+
+
+        let sameTypeNodes = clickNodeAndSameTypeNodesMap.get(node);
+
+        for (let i = 0; i < sameTypeNodes.length; i++) {
+                eleBackground.setClickBackgroundNormal(sameTypeNodes[i]);
+        }
+
+        clickNodeCodeAndNodeMap.delete(nodeCode);
+        currentClickNode = null;
+        currentNeedRenderNodes.push(node);
+        setNeedRenderChange();
+
+};
+
+let smartAlertRenderExtract = function(eleXpaths){
+        console.log("smartAlertRenderExtract",eleXpaths);
+        setAllRenderCancel(false);
+
+        let eleXpathArray = eleXpaths.split(",");
+        for (let i = 0; i < eleXpathArray.length; i++) {
+                let xpath = eleXpathArray[i];
+                if(xpath){
+                        let node= document.evaluate(xpath,document,null,XPathResult.ANY_TYPE,null).iterateNext();
+                        if(node){
+                                currentNeedRenderNodes.push(node);
+                        }
+                }
+        }
+        setNeedRenderChange();
+};
+let smartAlertRenderLoop = function(loopTypeValue){
+        console.log("smartAlertRenderLoop");
+        setAllRenderCancel(false);
+        try {
+                let loopNode= document.evaluate(loopTypeValue,document,null,XPathResult.ANY_TYPE,null).iterateNext();
+                currentNeedRenderNodes.push(loopNode.parentNode);
+                setNeedRenderChange();
+        }catch (e) {
+                console.log("smartAlertRenderLoop 失败 ",loopTypeValue,e);
+        }
+
+};
+
+let smartAlertCancel = function(){
+        setAllRenderCancel(true);
+};
+
+let smartAlertSelectAll = function(nodeCode){
+        let _node = clickNodeCodeAndNodeMap.get(nodeCode);
+        let _sameTypeNodes = clickNodeAndSameTypeNodesMap.get(_node);
+
+        for (let i = 0; i < _sameTypeNodes.length; i++) {
+                eleBackground.setClickSelfBackgroundChange(_sameTypeNodes[i]);
+        }
+        let _sameTypeLength = _sameTypeNodes.length;
+
+        let p2Arrays = [];
+
+        for (let i = 0; i < _sameTypeNodes.length; i++) {
+                let _sameTypeNode = _sameTypeNodes[i];
+                let _sameTypeNodeFullXpath = eleParams.getFullXpath(_sameTypeNode);
+                p2Arrays.push(eleParams.JoinNode_p2(_sameTypeNode,_sameTypeNodeFullXpath,_sameTypeLength));
+        }
+        return p2Arrays.join(SEPARATOR_WEBDATA_ARRAY);
+
+
+};
+let test = function(){
+        alert("test");
+        return "test end";
+};
+window.addEventListener("mouseover",function (ele) {
+        eleBackground.setMouseOverBackground(ele);
+});
+window.addEventListener("mouseout",function (ele){
+        eleBackground.setMouseOutBackground(ele);
+});
+
+let bridge = null;
+new QWebChannel(qt.webChannelTransport, function (channel) {
+        bridge = channel.objects.bridge;
+});
+
+window.addEventListener("click",function(ele){
+        console.log("onClick start------------------------------------------------------");
+        let node = ele.target;
+        let ns = node.getAttribute("style");
+        if(ns && ns.indexOf("mcClick:true;")!=-1){
+
+                ns = ns.replace("mcClick:true;","");
+                node.setAttribute("style",ns);
+
+        }else{
+                if (currentClickNode==node){
+                        console.log("元素已经被点击没有释放");
+                }else{
+                        let nodeCode = eleParams.getRandomCode();
+
+                        clickNodeCodeAndNodeMap.set(nodeCode,node);
+                        currentClickNode = node;
+
+                        let nodeName = node.nodeName;
+                        let nodeFullXpath = eleParams.getFullXpath(node);
+                        let sameTypeNodes = [node];
+                        let _searchModel = new SearchClickElements(node,nodeFullXpath);
+
+                        let loopXpath = nodeFullXpath;
+                        if(_searchModel.existLoop){
+                                sameTypeNodes = _searchModel.sameTypeNodes;
+                                loopXpath = _searchModel.headXpath;
+                        }
+
+                        setNeedRenderChange();
+                        for (let i = 0; i < sameTypeNodes.length; i++) {
+                                eleBackground.setClickSameTypeBackgroundChange(sameTypeNodes[i]);
+                        }
+                        eleBackground.setClickSelfBackgroundChange(node);
+                        clickNodeAndSameTypeNodesMap.set(node,sameTypeNodes);
+
+                        let eachp2 = eleParams.JoinNode_p2(node,nodeFullXpath,sameTypeNodes.length);
+                        if(bridge==null){
+                                console.log("qt通信组件未加载成功，请稍后");
+                        }else {
+                                bridge.clickSignalToQt(eachp2, nodeName, nodeCode, loopXpath);
+                        }
+                }
+
+                let e = ele || event;
+                e.cancelBubble = true;
+                e.stopPropagation();
+                e.preventDefault();
+                return true;
+        }
+},true);
+
+

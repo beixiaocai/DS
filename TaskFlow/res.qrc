@@ -1,0 +1,15 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/control/captcha.jpg</file>
+        <file>images/control/click.jpg</file>
+        <file>images/control/end.jpg</file>
+        <file>images/control/end-loop.jpg</file>
+        <file>images/control/extract-data.jpg</file>
+        <file>images/control/if-else.jpg</file>
+        <file>images/control/input-text.jpg</file>
+        <file>images/control/loop.jpg</file>
+        <file>images/control/mouse-ele.jpg</file>
+        <file>images/control/open.jpg</file>
+        <file>images/control/switch-select.jpg</file>
+    </qresource>
+</RCC>
