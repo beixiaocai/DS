@@ -5,6 +5,7 @@
 * 作者主页：http://www.any12345.com/user/4
 * 作者哔哩哔哩主页地址：https://space.bilibili.com/487906612
 * 软件介绍视频地址：https://www.bilibili.com/video/BV1uM4y167bg/
+* gitee开源地址：https://gitee.com/Vanishi/DS
 
 ### 软件介绍
 
