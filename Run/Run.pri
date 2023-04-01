@@ -1,21 +1,25 @@
  
 HEADERS += \
-    $$PWD/Run.h \
-    $$PWD/RunSettings.h \
+    $$PWD/RunDialog.h \
+    $$PWD/RunMessage.h \
     $$PWD/RunWebpage.h \
     $$PWD/RunWebview.h \
-    $$PWD/RunAlertDialog.h \
+    $$PWD/RunThreadPipline.h \
     $$PWD/RunHelper.h \
-    $$PWD/RunPipline.h
+    $$PWD/RunWebviewManager.h \
+    $$PWD/StartupBox.h \
+    $$PWD/StartupDialog.h
  
 SOURCES += \
-    $$PWD/Run.cpp \
-    $$PWD/RunSettings.cpp \
+    $$PWD/RunDialog.cpp \
+    $$PWD/RunMessage.cpp \
     $$PWD/RunWebpage.cpp \
     $$PWD/RunWebview.cpp \
-    $$PWD/RunAlertDialog.cpp \
+    $$PWD/RunThreadPipline.cpp \
     $$PWD/RunHelper.cpp \
-    $$PWD/RunPipline.cpp
+    $$PWD/RunWebviewManager.cpp \
+    $$PWD/StartupBox.cpp \
+    $$PWD/StartupDialog.cpp
 
 INCLUDEPATH += Run
 

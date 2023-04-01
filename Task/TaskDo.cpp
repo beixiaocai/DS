@@ -5,7 +5,7 @@
 #include "mCustomtaskBridge.h"
 #include "TaskFlow/pageCustomtaskFlow.h"
 #include "TaskFlow/pageCustomtaskFlowControl.h"
-#include "Run/Run.h"
+#include "Run/StartupDialog.h"
 #include "Utils/models.h"
 #include "Utils/database.h"
 #include "Utils/ComSplitVWidget.h"
@@ -135,11 +135,9 @@ void TaskDo::initTopMenuUi(){
         loadingLabel->hide();
         if(state){
             // 保存成功->进入执行页面
-            Run *page = new Run(new MTask(*m_task));
-            page->setAttribute(Qt::WA_DeleteOnClose);
-            Database::getInstance()->runDialogs.insert(page,true);
-
-            page->show();
+            StartupDialog *startup = new StartupDialog(new MTask(*m_task));
+            startup->setAttribute(Qt::WA_DeleteOnClose);
+            startup->show();
         }else{
            ComMessageBox::error(this,msg);
         }

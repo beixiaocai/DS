@@ -1,26 +1,12 @@
 ﻿#include "models.h"
 #include <QFile>
+#include <QRandomGenerator>
 
 MTaskGroup::MTaskGroup(){}
 MTaskGroup::MTaskGroup(int id,const QString name){
     this->id = id;
     this->name = name;
 }
-MTaskUserAgent::MTaskUserAgent(){
-
-}
-MTaskData::MTaskData(){}
-MTaskData::MTaskData(const QString &tbName,int num,int repeatNum,RUN_STATE state,const QString &startTime,const QString &endTime){
-    this->tbName = tbName;
-    this->num = num;
-    this->repeatNum = repeatNum;
-    this->state = state;
-    this->startTime = startTime;
-    this->endTime = endTime;
-}
-
-MTask::MTask(){}
-MTask::~MTask(){}
 bool MTask::fromFile(const QString &filename){
 
     QFile f(filename);
@@ -31,10 +17,16 @@ bool MTask::fromFile(const QString &filename){
     QStringList attrs = content.split(",");
 
     if(attrs.length()==8){
+        int r = QRandomGenerator::global()->bounded(100000,999999);
+     //    qsrand(time(NULL));
+     //    int r = qrand() % 1000000 + 1000000;
+        QString code = "importcode"+QString::number(r);
+        this->code = code;
 
         this->addressList = QString(QByteArray::fromBase64(attrs[0].toUtf8()).data()).
                 split(",");
         this->name = QByteArray::fromBase64(attrs[1].toUtf8()).data();
+        this->isHaveName = true;
         this->program = attrs[2];
         this->fieldCount = QString(QByteArray::fromBase64(attrs[3].toUtf8().data())).toInt();
 
@@ -70,6 +62,15 @@ void MTask::toFile(const QString &filename){
    file.write(content.toUtf8());
    file.close();
 
+}
+MTaskData::MTaskData(){}
+MTaskData::MTaskData(const QString &tbName,int num,int repeatNum,RUN_STATE state,const QString &startTime,const QString &endTime){
+    this->tbName = tbName;
+    this->num = num;
+    this->repeatNum = repeatNum;
+    this->state = state;
+    this->startTime = startTime;
+    this->endTime = endTime;
 }
 
 

@@ -118,8 +118,8 @@ void TaskData::initMenuUi(){
     connect(clearBtn,&QPushButton::clicked,this,[this](){
         loadingLabel->show();
         QTimer::singleShot(500,this,[this](){
-
-            Database::getInstance()->clearTable(m_taskCode);
+            QString msg;
+            Database::getInstance()->clearTaskData(m_taskCode,msg);
             tableWidget->setRowCount(0);
             tableWidget->clearContents();
             loadingLabel->hide();

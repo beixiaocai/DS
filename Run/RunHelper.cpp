@@ -2,16 +2,14 @@
 #include "Utils/models.h"
 #include "TaskFlow/mFcModels.h"
 #include "TaskFlow/mTaskDeserialize.h"
+#include "RunDialog.h"
 #include <QDebug>
 
-RunHelper::RunHelper(MTask *task,QObject *parent) : QObject(parent)
-{
-    this->task = task;
+RunHelper::RunHelper(QObject *parent) : QObject(parent){
+    mTask = ((RunDialog *)parent)->getTask();
 
-    m_taskdeser = new MTaskDeserialize(task->program,this);
-
+    m_taskdeser = new MTaskDeserialize(mTask->program,this);
     int fieldindex = 0;
-
     for (int i = 0; i < m_taskdeser->steps.length(); ++i) {
         MFlowStepParams *params = m_taskdeser->steps[i];
         if(MCONSTANT_FLOW_MENU_TYPE_ExtractBtn==params->menuType){
@@ -46,7 +44,9 @@ RunHelper::~RunHelper(){
     }
 
 }
-
+MTask * RunHelper::getTask(){
+    return mTask;
+}
 MFlowStepParams * RunHelper::getNextStepParams(QString lastStepID){
 
     MFlowStepParams *np= nullptr;

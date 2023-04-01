@@ -50,7 +50,7 @@ private:
     MTask *mCurTask = nullptr;
     void getTasks();
     void showTasks();
-    void getTaskWithCode(const QString &code);
+    void getTask(const QString &code);
     void onDelTask(bool state,QString &msg);
 signals:
     void notifyPageTaskData(const QString &taskName,const QString &taskCode);

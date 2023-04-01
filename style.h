@@ -38,18 +38,18 @@ const QString m_stylesheet_QToolButton_hollow = ".QToolButton {color:rgb(64,65,6
 const QString m_stylesheet_QToolButton_empty = "QToolButton{border:0px;}";
 
 // 背景为黑色，有边框
-const QString m_stylesheet_QPushButton = ".QPushButton {color:white;font-family:Microsoft YaHei;font-size:13px;background-color:rgb(64,65,66);border:none; border-radius: 3px;padding: 2px;}\
+const QString m_stylesheet_QPushButton = ".QPushButton {color:white;font-family:Microsoft YaHei;font-size:14px;background-color:rgb(64,65,66);border:none; border-radius: 3px;padding: 2px;}\
          .QPushButton:pressed {background-color: rgba(64,65,66,0.5);}\
          .QPushButton:hover {background-color: rgba(64,65,66,0.5);}\
          .QPushButton:focus{outline: none;}";
 // 背景为蓝色，有边框
-const QString m_stylesheet_QPushButton_blue = ".QPushButton {color:white;font-family:Microsoft YaHei;font-size:13px;background-color:rgb(43,113,237);border:none; border-radius: 3px;padding: 2px;}\
+const QString m_stylesheet_QPushButton_blue = ".QPushButton {color:white;font-family:Microsoft YaHei;font-size:14px;background-color:rgb(43,113,237);border:none; border-radius: 3px;padding: 2px;}\
          .QPushButton:pressed {background-color: rgba(43,113,237,0.5);}\
          .QPushButton:hover {background-color: rgba(43,113,237,0.5);}\
          .QPushButton:focus{outline: none;}";
 
 // 背景为白色，边框为黑色
-const QString m_stylesheet_QPushButton_hollow = ".QPushButton {color:rgb(64,65,66);font-family:Microsoft YaHei;font-size:13px;background-color:white; border:1px solid rgb(64,65,66); border-radius: 3px;padding: 2px;}\
+const QString m_stylesheet_QPushButton_hollow = ".QPushButton {color:rgb(64,65,66);font-family:Microsoft YaHei;font-size:14px;background-color:white; border:1px solid rgb(64,65,66); border-radius: 3px;padding: 2px;}\
          .QPushButton:pressed {background-color: rgba(240,240,240,0.8);}\
          .QPushButton:hover {background-color: rgba(240,240,240,0.4); border-color:rgba(64,65,66,0.5);}\
          .QPushButton:focus{outline: none;}";

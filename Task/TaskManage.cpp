@@ -8,7 +8,7 @@
 #include "Utils/ComLoadingWidget.h"
 #include "Utils/ComLineWidget.h"
 #include "Utils/ComMessageBox.h"
-#include "Run/Run.h"
+#include "Run/StartupDialog.h"
 #include "style.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -147,13 +147,13 @@ void TaskManage::initRowMenu(){
     connect(executeA, &QAction::triggered, this,[this](){
         // 执行任务
         m_useType = GetTaskUseType::ExecuteTask;
-        getTaskWithCode(mCurTask->code);
+        getTask(mCurTask->code);
 
     });
     connect(editA, &QAction::triggered, this,[this](){
         // 编辑任务
         m_useType = GetTaskUseType::EditTask;
-        getTaskWithCode(mCurTask->code);
+        getTask(mCurTask->code);
 
     });
 
@@ -175,7 +175,7 @@ void TaskManage::initRowMenu(){
             // 执行导出文件
             m_exportTaskDir = dir;
             m_useType = GetTaskUseType::ExportTask;
-            getTaskWithCode(mCurTask->code);
+            getTask(mCurTask->code);
 
         }
     });
@@ -299,7 +299,7 @@ void TaskManage::showTasks(){
         tableWidget->setRowCount(mTasks.length());
         for (int i = 0; i < mTasks.length(); ++i) {
             MTask *task = mTasks[i];
-            task->showNumRow = i;
+            task->tempIndex = i;
             int row = i;
             tableWidget->setRowHeight(row,70);
             QTableWidgetItem *indexItem = item->clone();
@@ -313,13 +313,13 @@ void TaskManage::showTasks(){
             tableWidget->setItem(row,1,nameItem);
             QTableWidgetItem *stateItem = item->clone();
 
-            if(task->isRun){
-                if (task->data.state==MTaskData::FINISH){
+            if(task->tempIsRun){
+                if (task->tempData.state==MTaskData::FINISH){
                     stateItem->setIcon(state_ok);
-                    stateItem->setText(QString("已完成 已采集%1条,重复%2条").arg(task->data.num).arg(task->data.repeatNum));//rgb(76,175,80)
+                    stateItem->setText(QString("已完成 已采集%1条,重复%2条").arg(task->tempData.num).arg(task->tempData.repeatNum));//rgb(76,175,80)
                 }else {
                     stateItem->setIcon(state_stop);
-                    stateItem->setText(QString("已停止 已采集%1条,重复%2条").arg(task->data.num).arg(task->data.repeatNum));//rgb(255,80,80)
+                    stateItem->setText(QString("已停止 已采集%1条,重复%2条").arg(task->tempData.num).arg(task->tempData.repeatNum));//rgb(255,80,80)
                 }
 
             }else{
@@ -347,15 +347,16 @@ void TaskManage::showTasks(){
 }
 void TaskManage::onDelTask(bool state,QString &msg){
     if(state){
-        Database::getInstance()->delTaskData(mCurTask->code,true);
+        Database::getInstance()->delTaskData(mCurTask->code);
+
         // 小于当前行的row不变，大于当前行的row减1
         for (int i = 0; i < mTasks.count(); ++i) {
-            if(mTasks[i]->showNumRow>mCurTask->showNumRow){
-                mTasks[i]->showNumRow-=1;
+            if(mTasks[i]->tempIndex > mCurTask->tempIndex){
+                mTasks[i]->tempIndex-=1;
             }
         }
-        tableWidget->removeRow(mCurTask->showNumRow);//删除table中的显示
-        mTasks.removeAt(mCurTask->showNumRow);
+        tableWidget->removeRow(mCurTask->tempIndex);//删除table中的显示
+        mTasks.removeAt(mCurTask->tempIndex);
         delete mCurTask;
         mCurTask = nullptr;
 
@@ -367,22 +368,22 @@ void TaskManage::onDelTask(bool state,QString &msg){
     }
 
 }
-void TaskManage::getTaskWithCode(const QString &code){
+void TaskManage::getTask(const QString &code){
     QString msg;
     MTask * task = new MTask;
     loading->resize(this->size());
     loading->show();
-    bool state = Database::getInstance()->getTaskWithCode(code,msg,task);
-
+    bool state = Database::getInstance()->getTask(code,msg,task);
     // 返回结果
     loading->hide();
     if(state){
         if(m_useType==GetTaskUseType::ExecuteTask){
             // 执行任务
-            Run *page = new Run(task);// 交给Run界面释放task
-            page->setAttribute(Qt::WA_DeleteOnClose);
-            Database::getInstance()->runDialogs.insert(page,true);
-            page->show();
+            StartupDialog *startup = new StartupDialog(task);// 交给StartupDialog释放task
+            startup->setAttribute(Qt::WA_DeleteOnClose);
+            startup->show();
+//             StartupDialog dlg(task);
+//             dlg.exec();
 
         }else if (m_useType==GetTaskUseType::EditTask) {
             // 编辑任务

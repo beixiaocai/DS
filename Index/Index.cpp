@@ -29,18 +29,17 @@ Index::Index(QWidget *parent) : QWidget(parent)
     if(IS_reportHeart){
         mReport= new Report;
         mReport->start();
-
-        connect(ApiCheckVersion::getInstance(),&ApiCheckVersion::notifyCheckVersion,this,[this](bool state,QString &msg,MVersion &version){
-            if(state){
-                float curVersion = QCoreApplication::applicationVersion().toFloat();
-                if(version.version > curVersion){
-                    Version dlg(version,this);
-                    dlg.exec();
-                }
-            }
-        });
     }
 
+    connect(ApiCheckVersion::getInstance(),&ApiCheckVersion::notifyCheckVersion,this,[this](bool state,QString &msg,MVersion &version){
+        if(state){
+            float curVersion = QCoreApplication::applicationVersion().toFloat();
+            if(version.version > curVersion){
+                Version dlg(version,this);
+                dlg.exec();
+            }
+        }
+    });
     QTimer::singleShot(2000,this,[](){
         ApiCheckVersion::getInstance()->checkVersion();
     });

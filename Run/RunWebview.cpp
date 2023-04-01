@@ -1,14 +1,14 @@
 ﻿#include "RunWebview.h"
-#include "RunSettings.h"
+#include "RunWebviewManager.h"
 #include "RunWebpage.h"
 #include <QTimer>
 #include <QDebug>
 
-RunWebView::RunWebView(RunSettings *settings,QWidget *parent) : QWebEngineView(parent),
-    mRunSettings(settings){
+RunWebView::RunWebView(RunWebViewManager *webviewManager,QWidget *parent) : QWebEngineView(parent),
+    mWebviewManager(webviewManager){
 
     delete page();
-    this->setPage(new RunWebPage(mRunSettings->profile));
+    this->setPage(new RunWebPage(mWebviewManager->profile));
 
 
     QTimer *timer = new QTimer(this);
@@ -21,7 +21,7 @@ RunWebView::RunWebView(RunSettings *settings,QWidget *parent) : QWebEngineView(p
     connect(this, &QWebEngineView::loadStarted, this,[this,timer](){
         qDebug()<<"RunWebView::loadStarted.......";
         m_injectCheckTimes = 0;
-        mRunSettings->pageIsFinished = false;
+        mWebviewManager->pageIsFinished = false;
 
         timer->start(10000);
 
@@ -34,7 +34,7 @@ RunWebView::RunWebView(RunSettings *settings,QWidget *parent) : QWebEngineView(p
     });
     connect(this, &QWebEngineView::urlChanged, this,[this](const QUrl &url){
         if(url.url()!=""){
-            emit mRunSettings->webViewNotifyUrlChanged(url.url());
+            emit mWebviewManager->webViewNotifyUrlChanged(url.url());
         }
     });
 
@@ -47,14 +47,14 @@ RunWebView::~RunWebView(){
 void RunWebView::injectJavascriptCheck(){
     if(m_injectCheckTimes>20){
         // 注入检测超过指定次数，可能该网页已不能访问，标记加载完整
-        mRunSettings->pageIsFinished = true;
+        mWebviewManager->pageIsFinished = true;
 
     }else {
        page()->runJavaScript("injectJavascriptCheck()", [this](const QVariant &v) {
            if(v.toString()=="success"){
-                mRunSettings->pageIsFinished = true;
+                mWebviewManager->pageIsFinished = true;
            }else {
-                qDebug()<<"injectJavascriptCheck "<<m_injectCheckTimes;
+                qDebug()<<"RunWebView::injectJavascriptCheck m_injectCheckTimes="<<m_injectCheckTimes;
                 m_injectCheckTimes +=1;
                 QTimer::singleShot(m_injectCheckTimes*50,this,[this](){
                     injectJavascriptCheck();
@@ -67,7 +67,7 @@ QWebEngineView *RunWebView::createWindow(QWebEnginePage::WebWindowType type){
     qDebug()<<"RunWebView::createWindow"<<type<<page()<<this->url().url();
 
     if(type == QWebEnginePage::WebBrowserTab){
-        return mRunSettings->createWebView();
+        return mWebviewManager->createWebView();
     }
     return this;
 }

@@ -4,17 +4,17 @@
 #include <QWebEngineView>
 #include <QtCore5Compat>
 
-class RunSettings;
+class RunWebViewManager;
 
 class RunWebView : public QWebEngineView
 {
     Q_OBJECT
 public:
-    explicit RunWebView(RunSettings *settings,QWidget *parent);
+    explicit RunWebView(RunWebViewManager *webviewManager,QWidget *parent);
     ~RunWebView();
 private:
 
-    RunSettings *mRunSettings;
+    RunWebViewManager *mWebviewManager;
     int  m_injectCheckTimes = 0;
     void injectJavascriptCheck();
 

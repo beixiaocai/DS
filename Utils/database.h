@@ -25,18 +25,20 @@ private:
 public:
     static Database *getInstance();
 
-
-    bool createTable(const QString &tbName,const QStringList &fields); // 创建业务表
-    bool clearTable(const QString &tbName);
-
-    void async_addTaskData(const QString &add_task_data_sql);
-    void async_updateTaskData(MTaskData &taskData);
+    //任务表
     bool addTask(MTask *task,QString &msg);
     bool delTask(const QString &code,QString &msg);
-    bool delTaskData(const QString &code,bool isDel = false);
-
     bool getTasks(int groupId,QString &msg,QVector<MTask *> &tasks);
-    bool getTaskWithCode(const QString &code,QString &msg,MTask *task);
+    bool getTask(const QString &code,QString &msg,MTask *task);
+
+    //任务数据表
+    bool createTaskData(const QString &code,QString &msg,const QStringList &fields);//创建任务数据表
+    bool clearTaskData(const QString &code,QString &msg);//清空任务数据表的数据，但不删除数据表
+    void asyncAddTaskData(const QString &add_task_data_sql);
+    void asyncUpdateTaskData(MTaskData &taskData);
+    bool getTaskData(const QString &code);//判断是否存在任务数据表
+    bool delTaskData(const QString &code);//清空任务数据表的数据+删除数据表
+
     QString read_file(QString filename);
 
     QVector<QVector<QString>> select(int queryColumnCount,const QString &sql);
@@ -55,9 +57,6 @@ public:
     QString getFinger() const;
 
 
-    // 在mainwindow上打开的独立的dialog，退出登录的时候，需要确保这些对象全部销毁，否则会出现内存泄漏
-    QHash<QObject *,bool> runDialogs;
-
 protected:
     void run() override;
 
@@ -68,7 +67,7 @@ private:
 
     static QAtomicPointer<Database> m_instance;
     static QMutex m_instancemtx;
-    QString m_finger;
+    QString m_finger;//当前机器指纹
 
 signals:
 
