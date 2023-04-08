@@ -1,6 +1,6 @@
  
 HEADERS += \
-    $$PWD/Report.h \
+    $$PWD/ReportThread.h \
     $$PWD/About.h \
     $$PWD/Index.h \
     $$PWD/Version.h \
@@ -8,7 +8,7 @@ HEADERS += \
     $$PWD/SettingsProxy.h
 
 SOURCES += \
-    $$PWD/Report.cpp \
+    $$PWD/ReportThread.cpp \
     $$PWD/About.cpp \
     $$PWD/Index.cpp \
     $$PWD/Version.cpp \

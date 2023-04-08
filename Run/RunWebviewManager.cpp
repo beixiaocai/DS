@@ -15,7 +15,7 @@
 #include <QNetworkAccessManager>
 #include <QWebEngineCookieStore>
 #include <QLineEdit>
-#include <QDebug>
+#include <QsLog.h>
 
 
 
@@ -52,7 +52,7 @@ RunWebViewManager::RunWebViewManager(RunDialog *runDialog) : QObject(runDialog){
 
 }
 RunWebViewManager::~RunWebViewManager(){
-    qDebug()<<"RunWebViewManager::~RunWebViewManager()";
+    QLOG_INFO()<<"RunWebViewManager::~RunWebViewManager()";
 
     if(m_reusedWebView!=nullptr){
         delete m_reusedWebView;

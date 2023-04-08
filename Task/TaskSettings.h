@@ -13,7 +13,7 @@ class TaskSettings : public QWidget
 {
     Q_OBJECT
 public:
-    explicit TaskSettings(MTask *task,QWidget *parent);
+    explicit TaskSettings(QWidget *parent,MTask *task);
     ~TaskSettings();
 private:
     MTask *m_task;

@@ -14,7 +14,7 @@ class MCustomTaskSmartAlertSelectAll;
 class MCustomTaskSmartAlertSuccess;
 class PageCustomTaskFlowControl;
 class MFlowStepData;
-class MCustomTaskWebView;
+class TaskWebView;
 
 
 class TaskSmartalert : public QDialog
@@ -22,7 +22,7 @@ class TaskSmartalert : public QDialog
     Q_OBJECT
 
 public:
-    explicit TaskSmartalert(MCustomTaskWebView *webView,PageCustomTaskFlowControl *fc,QWidget *parent);
+    explicit TaskSmartalert(QWidget *parent,TaskWebView *webView,PageCustomTaskFlowControl *fc);
 
     void block();
 
@@ -83,7 +83,7 @@ private:
 
 
     MEachParams m_i;// 网页直接交互过来的参数
-    MCustomTaskWebView *m_webView;
+    TaskWebView *m_webView;
     PageCustomTaskFlowControl *m_fc;
 private:
     void smartAlertSelectAll(MCustomTaskSmartAlertSelectAll * selectAll);

@@ -1,8 +1,5 @@
 ﻿#include "mFcModels.h"
-#include <QDebug>
-
-
-
+#include <QsLog.h>
 
 MControl::MControl(QString menuType,
                              QString menuTip,
@@ -38,7 +35,7 @@ MFlowStepParamsOpenWeb::MFlowStepParamsOpenWeb(const QString &program){
         rollTypeIndex = QString(QByteArray::fromBase64(params[17].toUtf8().data())).toInt();
 
     }else {
-        qDebug()<<"MFlowStepParamsOpenWeb(const QString &program) 反序列化失败";
+        QLOG_INFO()<<"MFlowStepParamsOpenWeb(const QString &program) 反序列化失败";
     }
 }
 const QString MFlowStepParamsOpenWeb::getProgram(){
@@ -95,7 +92,7 @@ MFlowStepParamsClickEle::MFlowStepParamsClickEle(const QString &program){
         isTurnPage = QString(QByteArray::fromBase64(params[20].toUtf8().data())).toInt();
 
     }else {
-        qDebug()<<"MFlowStepParamsClickEle(const QString &program) 反序列化失败";
+        QLOG_INFO()<<"MFlowStepParamsClickEle(const QString &program) 反序列化失败";
     }
 }
 const QString MFlowStepParamsClickEle::getProgram(){
@@ -126,9 +123,11 @@ const QString MFlowStepParamsClickEle::getProgram(){
     return QString(params.join(SEPARATOR_1).toUtf8().toBase64().data());
 }
 
-MParamsField::MParamsField(){}
+MParamsField::MParamsField(){
+    QLOG_INFO()<<"MParamsField::MParamsField()";
+}
 MParamsField::MParamsField(const QString &program){
-
+    QLOG_INFO()<<"MParamsField::MParamsField(const QString &program)";
     QStringList params = program.split(SEPARATOR_1);
     if(params.length() == 7){
         fieldXpath = QString(QByteArray::fromBase64(params[0].toUtf8().data()));
@@ -139,11 +138,11 @@ MParamsField::MParamsField(const QString &program){
         fieldActionMethod = QString(QByteArray::fromBase64(params[5].toUtf8().data()));
         currentRow = QString(QByteArray::fromBase64(params[6].toUtf8().data())).toInt();
     }else {
-        qDebug()<<"MParamsField(const QString &program) 反序列化失败";
+        QLOG_INFO()<<"MParamsField::MParamsField(const QString &program) 反序列化失败";
     }
 }
 MParamsField::~MParamsField(){
-    qDebug()<<"MParamsField::~MParamsField()";
+    QLOG_INFO()<<"MParamsField::~MParamsField()";
 }
 const QString MParamsField::getProgram(){
 
@@ -188,7 +187,7 @@ MFlowStepParamsExtract::MFlowStepParamsExtract(const QString &program){
         }
 
     }else {
-        qDebug()<<"MFlowStepParamsExtract(const QString &program) 反序列化失败";
+        QLOG_INFO()<<"MFlowStepParamsExtract(const QString &program) 反序列化失败";
     }
 
 }
@@ -232,7 +231,7 @@ MFlowStepParamsInput::MFlowStepParamsInput(const QString &program){
         inputText = QString(QByteArray::fromBase64(params[9].toUtf8().data()));
 
     }else {
-        qDebug()<<"MFlowStepParamsInput(const QString &program) 反序列化失败";
+        QLOG_INFO()<<"MFlowStepParamsInput(const QString &program) 反序列化失败";
     }
 }
 const QString MFlowStepParamsInput::getProgram(){
@@ -276,7 +275,7 @@ MFlowStepParamsSwitch::MFlowStepParamsSwitch(const QString &program){
         waitEmergintEle = QString(QByteArray::fromBase64(params[7].toUtf8().data()));
         isLoop = QString(QByteArray::fromBase64(params[8].toUtf8().data())).toInt();
     }else {
-        qDebug()<<"MFlowStepParamsSwitch(const QString &program) 反序列化失败";
+        QLOG_INFO()<<"MFlowStepParamsSwitch(const QString &program) 反序列化失败";
     }
 }
 const QString MFlowStepParamsSwitch::getProgram(){
@@ -307,7 +306,7 @@ MFlowStepParamsIf::MFlowStepParamsIf(const QString &program){
         waitEmergintEle = QString(QByteArray::fromBase64(params[5].toUtf8().data()));
         isLoop = QString(QByteArray::fromBase64(params[6].toUtf8().data())).toInt();
     }else {
-        qDebug()<<"MFlowStepParamsMouse(const QString &program) 反序列化失败";
+        QLOG_INFO()<<"MFlowStepParamsMouse(const QString &program) 反序列化失败";
     }
 }
 const QString MFlowStepParamsIf::getProgram(){
@@ -342,7 +341,7 @@ MFlowStepParamsLoop::MFlowStepParamsLoop(const QString &program){
         endLoopTimes = QString(QByteArray::fromBase64(params[10].toUtf8().data())).toInt();
 
     }else {
-        qDebug()<<"MFlowStepParamsLoop(const QString &program) 反序列化失败";
+        QLOG_INFO()<<"MFlowStepParamsLoop(const QString &program) 反序列化失败";
     }
 }
 const QString MFlowStepParamsLoop::getProgram(){
@@ -378,7 +377,7 @@ MFlowStepParamsMouse::MFlowStepParamsMouse(const QString &program){
         waitEmergintEle = QString(QByteArray::fromBase64(params[7].toUtf8().data()));
         isLoop = QString(QByteArray::fromBase64(params[8].toUtf8().data())).toInt();
     }else {
-        qDebug()<<"MFlowStepParamsMouse(const QString &program) 反序列化失败";
+        QLOG_INFO()<<"MFlowStepParamsMouse(const QString &program) 反序列化失败";
     }
 }
 const QString MFlowStepParamsMouse::getProgram(){

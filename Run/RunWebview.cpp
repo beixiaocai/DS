@@ -2,7 +2,7 @@
 #include "RunWebviewManager.h"
 #include "RunWebpage.h"
 #include <QTimer>
-#include <QDebug>
+#include <QsLog.h>
 
 RunWebView::RunWebView(RunWebViewManager *webviewManager,QWidget *parent) : QWebEngineView(parent),
     mWebviewManager(webviewManager){
@@ -14,12 +14,12 @@ RunWebView::RunWebView(RunWebViewManager *webviewManager,QWidget *parent) : QWeb
     QTimer *timer = new QTimer(this);
 
     connect(timer,&QTimer::timeout,this,[this,timer](){
-        qDebug()<<"RunWebView::timeout 10s";
+        QLOG_INFO()<<"RunWebView::timeout 10s";
         timer->stop();
         this->reload();
     });
     connect(this, &QWebEngineView::loadStarted, this,[this,timer](){
-        qDebug()<<"RunWebView::loadStarted.......";
+        QLOG_INFO()<<"RunWebView::loadStarted.......";
         m_injectCheckTimes = 0;
         mWebviewManager->pageIsFinished = false;
 
@@ -27,7 +27,7 @@ RunWebView::RunWebView(RunWebViewManager *webviewManager,QWidget *parent) : QWeb
 
     });
     connect(this, &QWebEngineView::loadFinished,this,[this,timer](bool){
-        qDebug()<<"RunWebView::loadFinished.......";
+        QLOG_INFO()<<"RunWebView::loadFinished.......";
         timer->stop();
         injectJavascriptCheck();
 
@@ -40,7 +40,7 @@ RunWebView::RunWebView(RunWebViewManager *webviewManager,QWidget *parent) : QWeb
 
 }
 RunWebView::~RunWebView(){
-    qDebug()<<"RunWebView::~RunWebView()";
+    QLOG_INFO()<<"RunWebView::~RunWebView()";
     delete page();
 
 }
@@ -54,7 +54,7 @@ void RunWebView::injectJavascriptCheck(){
            if(v.toString()=="success"){
                 mWebviewManager->pageIsFinished = true;
            }else {
-                qDebug()<<"RunWebView::injectJavascriptCheck m_injectCheckTimes="<<m_injectCheckTimes;
+                QLOG_INFO()<<"RunWebView::injectJavascriptCheck m_injectCheckTimes="<<m_injectCheckTimes;
                 m_injectCheckTimes +=1;
                 QTimer::singleShot(m_injectCheckTimes*50,this,[this](){
                     injectJavascriptCheck();
@@ -64,7 +64,7 @@ void RunWebView::injectJavascriptCheck(){
     }
 }
 QWebEngineView *RunWebView::createWindow(QWebEnginePage::WebWindowType type){
-    qDebug()<<"RunWebView::createWindow"<<type<<page()<<this->url().url();
+    QLOG_INFO()<<"RunWebView::createWindow"<<type<<page()<<this->url().url();
 
     if(type == QWebEnginePage::WebBrowserTab){
         return mWebviewManager->createWebView();

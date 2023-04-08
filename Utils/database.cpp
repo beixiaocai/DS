@@ -9,7 +9,7 @@
 #include <QDateTime>
 #include <Windows.h>
 #include <QFile>
-//#include <QsLog.h>
+#include <QsLog.h>
 
 QAtomicPointer<Database> Database::m_instance = 0;
 QMutex Database::m_instancemtx;
@@ -36,7 +36,7 @@ Database::Database(): QThread(nullptr){
         MTaskUserAgent ua;
         ua.id = i;
         ua.name = "win10"+QString::number(i);
-        ua.userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36 Edg/100.0.1185.39";
+        ua.userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36";
         ua.terminal = 1;
         userAgents.append(ua);
     }
@@ -46,9 +46,9 @@ Database::Database(): QThread(nullptr){
     m_sqldb->setDatabaseName(QApplication::applicationDirPath()+"/"+"data.db");
 
     if (!m_sqldb->open()){
-       qDebug() << "Database.cpp Database() Error " << m_sqldb->lastError();
+        QLOG_INFO() << "Database.cpp failed to connect sqlite :" << m_sqldb->lastError();
     }else{
-        qDebug() << "Database.cpp Database() Succee to connect sqlite" ;
+        QLOG_INFO() << "Database.cpp succee to connect sqlite" ;
 
         QStringList tbs = m_sqldb->tables();
         bool tb_RunResult_exist = false;// 采集结果表是否存在
@@ -146,7 +146,7 @@ bool Database::addTask(MTask *task,QString &msg){
     int count = 0;
     QString sql_select = QString("select count(1) from %1 where code='%2' limit 1").arg(TABLE_TASK).arg(task->code);
     if(!query.exec(sql_select)){
-        qDebug()<<"Database::addTask Error:"<<query.lastError()<<","<<sql_select;
+        QLOG_INFO()<<"Database::addTask Error:"<<query.lastError()<<","<<sql_select;
     }else{
         if(query.next()){
             count = query.value(0).toInt();
@@ -169,7 +169,7 @@ bool Database::addTask(MTask *task,QString &msg){
 .arg(task->defaultUserAgent).arg(curTime.toString(timeFmt)).arg(task->code);
 
         if(!query.exec(sql_update)){
-            qDebug()<<"Database::addTask Error:"<<query.lastError()<<","<<sql_update;
+            QLOG_INFO()<<"Database::addTask Error:"<<query.lastError()<<","<<sql_update;
             msg = "更新任务失败: "+query.lastError().text();
         }else{
             state = true;
@@ -188,7 +188,7 @@ bool Database::addTask(MTask *task,QString &msg){
                       ",'"+task->defaultUserAgent+"','"+curTime.toString(timeFmt)+"','"+curTime.toString(timeFmt)+"');";
 
         if(!query.exec(sql_add)){
-            qDebug()<<"Database::addTask Error:"<<query.lastError()<<","<<sql_add;
+            QLOG_INFO()<<"Database::addTask Error:"<<query.lastError()<<","<<sql_add;
             msg = "添加任务失败: "+query.lastError().text();
         }else{
             state = true;
@@ -208,7 +208,7 @@ bool Database::delTask(const QString &code,QString &msg){
     QSqlQuery query(*m_sqldb);
     QString sql_del = QString("DELETE FROM '%1' where code='%2' ").arg(TABLE_TASK).arg(code);
     if(!query.exec(sql_del)){
-        qDebug()<<"Database::delTask Error:"<<query.lastError()<<","<<sql_del;
+        QLOG_INFO()<<"Database::delTask Error:"<<query.lastError()<<","<<sql_del;
         msg = "删除任务失败: "+query.lastError().text();
     }else{
         state = true;
@@ -230,7 +230,7 @@ bool Database::getTask(const QString &code,QString &msg,MTask *task){
 
     QString sql_select = QString("select id,code,groupId,name,addressList,program,fieldCount,isBrowserAllowRunningInsecureContent,isBrowserAutoLoadImages,isBrowserAutoLoadIconsForPage,isBrowserPluginsEnabled,defaultUserAgent,addTime,lastUpdateTime from %1 where code='%2' limit 1").arg(TABLE_TASK).arg(code);
     if(!query.exec(sql_select)){
-        qDebug()<<"Database::getTaskWithCode Error:"<<query.lastError()<<","<<sql_select;
+        QLOG_INFO()<<"Database::getTaskWithCode Error:"<<query.lastError()<<","<<sql_select;
     }else{
         while(query.next()){
 
@@ -285,7 +285,7 @@ bool Database::getTasks(int groupId,QString &msg,QVector<MTask *> &tasks){
 
          }
     }else{
-        qDebug()<<"Database::getTasks Error:"<<query.lastError()<<","<<sql_select_task_data;
+        QLOG_INFO()<<"Database::getTasks Error:"<<query.lastError()<<","<<sql_select_task_data;
     }
     query.clear();
 
@@ -318,7 +318,7 @@ bool Database::getTasks(int groupId,QString &msg,QVector<MTask *> &tasks){
 
     }else{
         msg = QString("获取任务失败：%1").arg(query.lastError().text());
-        qDebug()<<"Database::getTasks Error:"<<query.lastError()<<","<<sql_select_task;
+        QLOG_INFO()<<"Database::getTasks Error:"<<query.lastError()<<","<<sql_select_task;
     }
     query.clear();
 
@@ -342,11 +342,11 @@ bool Database::createTaskData(const QString &code,QString &msg,const QStringList
     }
     sql+=" ) ";
 
-    qDebug()<<"Database::createTaskData "<<sql;
+    QLOG_INFO()<<"Database::createTaskData "<<sql;
 
     if(!query.exec(sql)){
         msg = QString("创建数据表失败:%1").arg(query.lastError().text());
-        qDebug()<<"Database::createTaskData Error:"<<query.lastError()<<","<<sql;
+        QLOG_INFO()<<"Database::createTaskData Error:"<<query.lastError()<<","<<sql;
     }else{
         success = true;
         query.exec(QString("insert into %1 (tbName) values ('%2');").arg(TABLE_TASK_DATA).arg(code));
@@ -368,7 +368,7 @@ bool Database::clearTaskData(const QString &code,QString &msg){
 
     if(!query.exec()){
        msg = QString("清空数据表失败:%1").arg(query.lastError().text());
-       qDebug()<<"Database::clearTaskData Error:"<<query.lastError();
+       QLOG_INFO()<<"Database::clearTaskData Error:"<<query.lastError();
     }else{
         success = true;
     }
@@ -503,7 +503,7 @@ QVector<QVector<QString>> Database::select(int queryColumnCount,const QString &s
     QSqlQuery query(*m_sqldb);
     QVector<QVector<QString>> data;
     if(!query.exec(sql)){
-        qDebug()<<"Database::select Error:"<<query.lastError()<<","<<sql;
+        QLOG_INFO()<<"Database::select Error:"<<query.lastError()<<","<<sql;
     }else{
          while(query.next()){
              QVector<QString> columnData;
@@ -524,7 +524,7 @@ int Database::getTableRowCount(const QString &tbName){
     int count = 0;
     QString sql = QString("SELECT count(1) from %1").arg(tbName);
     if(!query.exec(sql)){
-        qDebug()<<"Database::getTableRowCount Error:"<<query.lastError()<<","<<sql;
+        QLOG_INFO()<<"Database::getTableRowCount Error:"<<query.lastError()<<","<<sql;
     }else{
         if(query.next()){
             count = query.value(0).toInt();
@@ -549,10 +549,9 @@ QStringList Database::getTableFields(const QString &tbName){
     //QVariant(QString, "")
     //QVariant(qlonglong, 1)
     QString sql = QString("PRAGMA table_info('%1')").arg(tbName);
-    qDebug()<<"Database::getTableFields "<<sql;
 
     if(!query.exec(sql)){
-         qDebug()<<"Database::getTableFields Error:"<<query.lastError()<<","<<sql;
+         QLOG_INFO()<<"Database::getTableFields() Error:"<<query.lastError()<<","<<sql;
     }else{
         while(query.next()){
             names.append(query.value(1).toString());
@@ -561,9 +560,9 @@ QStringList Database::getTableFields(const QString &tbName){
     }
     query.clear();
     dbmtx.unlock();
-    if(names.count()>0){
-       names.removeAt(0);// "id" 不需要
-    }
+//    if(names.count()>0){
+//       names.removeAt(0);// "id" 不需要
+//    }
 //    if(names.count()>0){
 //        names.removeAt(0);// "isRepeat" 不需要
 //    }

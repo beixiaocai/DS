@@ -16,9 +16,8 @@
 #include <QLabel>
 #include <QTimer>
 
-Task::Task(MTask *task,QWidget *parent) : QWidget(parent),m_task(task)
+Task::Task(QWidget *parent,MTask *task) : QWidget(parent),mTask(task)
 {
-
      setAttribute(Qt::WA_StyledBackground,true);
      setStyleSheet(QString(".Task{background-color:%1;}").arg(m_rgb_basic));
 
@@ -33,7 +32,7 @@ Task::Task(MTask *task,QWidget *parent) : QWidget(parent),m_task(task)
      boxLayout->addWidget(stackedWidget);
 
 
-    if(m_task->type == MTask::TASKTYPE::ADD){
+    if(mTask->type == MTask::TASKTYPE::ADD){
         // 生成任务
         initAddView();
         QTimer::singleShot(50,this,[this](){
@@ -55,14 +54,14 @@ Task::Task(MTask *task,QWidget *parent) : QWidget(parent),m_task(task)
     }
 }
 Task::~Task(){
-    delete m_task;
-    m_task = nullptr;
+    delete mTask;
+    mTask = nullptr;
 
 }
 
 
 void Task::initSettings(){
-    mSettings = new TaskSettings(m_task,stackedWidget);
+    mSettings = new TaskSettings(stackedWidget,mTask);
     connect(mSettings,&TaskSettings::notifyBack,this,[this](){
         stackedWidget->setCurrentWidget(mTaskDo);
 
@@ -71,7 +70,7 @@ void Task::initSettings(){
 }
 void Task::initAddViewDo(){
 
-    mTaskDo = new TaskDo(m_task,stackedWidget);
+    mTaskDo = new TaskDo(stackedWidget,mTask);
     connect(mTaskDo, &TaskDo::notifyChangeTabName,this,&Task::notifyChangeTabName);
     connect(mTaskDo, &TaskDo::notifyChangeTabIcon,this,&Task::notifyChangeTabIcon);
 
@@ -96,16 +95,16 @@ void Task::initAddView(){
     groupComboBox->setItemDelegate(new QStyledItemDelegate(groupComboBox));
     groupComboBox->setStyleSheet(m_stylesheet_QComboBox);
 
-    m_taskGroups = Database::getInstance()->taskGroups;
+    mTaskGroups = Database::getInstance()->taskGroups;
 
-    for (int i = 0; i < m_taskGroups.length(); ++i) {
-        groupComboBox->addItem(m_taskGroups[i].name);
+    for (int i = 0; i < mTaskGroups.length(); ++i) {
+        groupComboBox->addItem(mTaskGroups[i].name);
         if(i==0){
-            m_currentGroupId = m_taskGroups[i].id;
+            m_currentGroupId = mTaskGroups[i].id;
         }
     }
     connect(groupComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged),[this](int index){
-         m_currentGroupId = m_taskGroups[index].id;
+         m_currentGroupId = mTaskGroups[index].id;
 
     });
 
@@ -119,7 +118,7 @@ void Task::initAddView(){
     addressText->setPlaceholderText("例如：http://www.any12345.com");
     addressText->setStyleSheet(m_stylesheet_QTextEdit);
     addressText->setFontFamily("Microsoft YaHei");
-    addressText->setText(m_task->addressList.join("\n")); // 设置默认值（可能存在携带过来的参数）
+    addressText->setText(mTask->addressList.join("\n")); // 设置默认值（可能存在携带过来的参数）
 
 
     QPushButton *okBtn = new QPushButton(addView);
@@ -142,8 +141,8 @@ void Task::initAddView(){
                     }
                 }
                 if(addressList.length()>0){
-                    m_task->groupId = m_currentGroupId;
-                    m_task->addressList = addressList;
+                    mTask->groupId = m_currentGroupId;
+                    mTask->addressList = addressList;
 
                     stackedWidget->setCurrentWidget(mTaskDo);
                     mTaskDo->startLoad();

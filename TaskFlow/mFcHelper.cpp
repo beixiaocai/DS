@@ -16,7 +16,7 @@ MFcHelper::MFcHelper(PageCustomTaskFlowControl *parent) : QObject(parent) {
     m_fc = parent;
 }
 MFcHelper::~MFcHelper(){
-    qDebug()<<"MFcHelper::~MFcHelper()";
+
 }
 void MFcHelper::serialize(){
     MTaskSerialize taskser(m_fc);

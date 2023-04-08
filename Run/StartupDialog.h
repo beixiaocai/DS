@@ -1,4 +1,4 @@
-#ifndef STARTUPDIALOGH_H
+﻿#ifndef STARTUPDIALOGH_H
 #define STARTUPDIALOGH_H
 
 #include <QDialog>
@@ -12,7 +12,6 @@ class QCheckBox;
 class QSpinBox;
 QT_END_NAMESPACE;
 struct MTask;
-
 
 class StartupDialog : public QDialog
 {

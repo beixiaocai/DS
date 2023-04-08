@@ -1,15 +1,15 @@
 ﻿#include "mainwindow.h"
 #include "ComMessageBox.h"
-#include "ApiReport.h"
+#include "Api.h"
 #include <QApplication>
 #include <QSharedMemory>
 #include <QFile>
 #include <QDir>
 #include <windows.h>
-//#include <QsLog.h>
+#include <QsLog.h>
 #include <QDate>
 #include <QDebug>
-//using namespace  QsLogging;
+using namespace  QsLogging;
 
 bool mkDirs(QString dirPath)
 {
@@ -25,21 +25,21 @@ bool mkDirs(QString dirPath)
     }
 }
 
-//void initLogger(QString &logDir){
+void initLogger(QString &logDir){
 
-//    if(mkDirs(logDir)){
-//        Logger& logger = Logger::instance();
-//        logger.setLoggingLevel(QsLogging::TraceLevel);
-//        QString logPath = QString("%1/%2.txt").arg(logDir,QDate::currentDate().toString("yyyy-MM-dd"));
-//        DestinationPtr des(DestinationFactory::MakeFileDestination(
-//                                           logPath, EnableLogRotation,MaxSizeBytes(10*1024*1024),MaxOldLogCount(5)));
-//        logger.addDestination(des);
-//        qDebug()<<"main.cpp: initLogger success logDir="<<logDir;
-//    }else{
-//        qDebug()<<"main.cpp: initLogger error logDir="<<logDir;
-//    }
+    if(mkDirs(logDir)){
+        Logger& logger = Logger::instance();
+        logger.setLoggingLevel(QsLogging::TraceLevel);
+        QString logPath = QString("%1/%2.txt").arg(logDir,QDate::currentDate().toString("yyyy-MM-dd"));
+        DestinationPtr des(DestinationFactory::MakeFileDestination(
+                                           logPath, EnableLogRotation,MaxSizeBytes(10*1024*1024),MaxOldLogCount(5)));
+        logger.addDestination(des);
+        qDebug()<<"initLogger() success logDir="<<logDir;
+    }else{
+        qDebug()<<"initLogger() error logDir="<<logDir;
+    }
 
-//}
+}
 
 LONG ApplicationCrashHandler(EXCEPTION_POINTERS *pException){
 
@@ -49,7 +49,7 @@ LONG ApplicationCrashHandler(EXCEPTION_POINTERS *pException){
     QString crashMsg = QString("抱歉，软件发生了崩溃，请重启。错误代码：%1，错误地址：%2").
             arg(errCode).arg(errAdr);
 
-    ApiReport::getInstance()->reportCrash(crashMsg);
+    Api::reportCrash(crashMsg);
     ComMessageBox::error(NULL,crashMsg);
 
     return EXCEPTION_EXECUTE_HANDLER;
@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationName("any12345");
     QCoreApplication::setOrganizationDomain("www.any12345.com");
     QCoreApplication::setApplicationName("DS");
-    QCoreApplication::setApplicationVersion("1.4");
+    QCoreApplication::setApplicationVersion("1.5");
 
     SetUnhandledExceptionFilter((LPTOP_LEVEL_EXCEPTION_FILTER)ApplicationCrashHandler);//注冊异常捕获函数
 
@@ -90,9 +90,9 @@ int main(int argc, char *argv[])
     // 获取程序当前地址，需要在QApplication初始化之后获取，否则获取的地址错误
 //    QString logDir = QDir::homePath()+"/AppData/Local/DS/logs";
     QString logDir = QApplication::applicationDirPath() + "/logs";
-//    initLogger(logDir);
+    initLogger(logDir);
 
-    qDebug() << "mainwindow.cpp: DS start";
+    QLOG_INFO()<< "DS V"+QCoreApplication::applicationVersion()+"  Start";
     MainWindow mainWindow;
     mainWindow.show();
 

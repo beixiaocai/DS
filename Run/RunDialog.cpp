@@ -24,8 +24,10 @@
 #include <QCloseEvent>
 #include <QTimer>
 #include <QWebEngineHttpRequest>
-
-//#include <QsLog.h>
+#if (QT_VERSION >= QT_VERSION_CHECK(6,0,0))
+#include <QtCore5Compat>
+#endif
+#include <QsLog.h>
 
 
 const static int WAIT_SLEEP_UNIT = 1000; // 执行前，休眠单位:毫秒
@@ -33,7 +35,7 @@ const static int PAGESIZE = 10; // 执行页面的数据分页数
 
 
 RunDialog::RunDialog(MTask *task) : QDialog(nullptr), mTask(task){
-    qDebug() << "RunDialog::RunDialog()";
+    QLOG_INFO() << "RunDialog::RunDialog()";
 
     Qt::WindowFlags flags=Qt::Dialog;
     flags |=Qt::WindowMinMaxButtonsHint;
@@ -68,34 +70,29 @@ RunDialog::RunDialog(MTask *task) : QDialog(nullptr), mTask(task){
     mWebviewManager->getCurrentWebView()->load(QUrl(addrLine->text()));
 
 //    // 默认以数据库的字段显示
-    m_tbfields = Database::getInstance()->getTableFields(task->code);
+    mFields = Database::getInstance()->getTableFields(task->code);
 
 //    // 设置header（这里是数据库的字段名称为准）
-    tableWidget->setColumnCount(m_tbfields.length());
-    tableWidget->setHorizontalHeaderLabels(m_tbfields);
+    tableWidget->setColumnCount(mFields.length());
+    tableWidget->setHorizontalHeaderLabels(mFields);
 
+    exportBtn->show();
+    startBtn->show();
 
-    QTimer::singleShot(600,this,[this](){
-        exportBtn->show();
-        startBtn->show();
-
-        if(Database::getInstance()->getTaskData(mTask->code)){
-            // 存在数据
-            tableStateBtn->setArrowType(Qt::ArrowType::DownArrow);
-            loaddb();
-            tableWidget->show();
-        }
-        if(mTask->runParams.isLoop){
-            //开启循环采集
-            sendStartJobCommand();
-        }
-
-    });
-
+    if(Database::getInstance()->getTaskData(mTask->code)){
+        // 存在数据
+        tableStateBtn->setArrowType(Qt::ArrowType::DownArrow);
+        getData();
+        tableWidget->show();
+    }
+    if(mTask->runParams.isLoop){
+        //开启循环采集
+        sendStartJobCommand();
+    }
 
 }
 RunDialog::~RunDialog(){
-    qDebug() << "RunDialog::~RunDialog()";
+    QLOG_INFO() << "RunDialog::~RunDialog()";
 
     if(mThreadPipline){
         delete mThreadPipline;
@@ -117,6 +114,7 @@ RunDialog::~RunDialog(){
         delete mTask;
         mTask = nullptr;
     }
+
 }
 RunHelper *RunDialog::getHelper(){
     return mHelper;
@@ -133,33 +131,6 @@ void RunDialog::closeEvent(QCloseEvent *event){
         ComMessageBox::error(this,"任务执行中，无法关闭窗口，需要先停止采集");
     }
 }
-
-
-void RunDialog::loaddb(int p){
-    m_currentPage = p;
-
-    tableWidget->setRowCount(0);
-    tableWidget->clearContents();
-
-
-    (Database::getInstance()->getTableRowCount(mHelper->getTask()->code),false);
-
-    int queryColumnCount = m_tbfields.length();
-    QVector<QVector<QString>> data = Database::getInstance()->select(queryColumnCount,
-            QString("select %1 from %2 limit %3,%4 ").arg(m_tbfields.join(",")).arg(mHelper->getTask()->code).arg(PAGESIZE * (m_currentPage-1)).arg(PAGESIZE)
-         );
-
-    tableWidget->setRowCount(data.length());
-    for (int row = 0; row < data.length(); ++row) {
-        tableWidget->setRowHeight(row,30);
-        for (int column = 0; column < queryColumnCount; ++column) {
-            tableWidget->setItem(row,column,new QTableWidgetItem(data[row][column]));
-        }
-    }
-    tableWidget->scrollToBottom();
-
-}
-
 void RunDialog::startNextStep(QString lastStepID){
     if(mThreadPipline->jobCommandState){
 
@@ -167,7 +138,7 @@ void RunDialog::startNextStep(QString lastStepID){
         lastStepID.clear();
 
         if(np){
-            qDebug() << QString("RunDialog startNextStep() name=%1").arg(np->name);
+            QLOG_INFO() << QString("RunDialog startNextStep() name=%1").arg(np->name);
 
             QString menuType = np->menuType;
             if(MCONSTANT_FLOW_MENU_TYPE_OpenWebBtn==menuType){
@@ -194,8 +165,6 @@ void RunDialog::startNextStep(QString lastStepID){
 
     }
 }
-
-
 void RunDialog::startOpenWeb(MFlowStepParamsOpenWeb *params){
      QString url = params->url;
      if(params->carryParent!=nullptr){//当前步骤存在父窗体
@@ -280,13 +249,13 @@ void RunDialog::startClickEle(MFlowStepParamsClickEle *params){
 
                  }else if(ploop->loopTypeName==MCONSTANT_RADIO_SITEADDRESS){
                     // 网址列表的循环中，最后步骤的点击，一定是单独点击
-                    qDebug() << QString("Run.cpp startClickEle() carryAddressCurrent=%1, carryAddressTotal=%2").arg(ploop->carryAddressCurrent).arg(ploop->carryAddressTotal);
+                    QLOG_INFO() << QString("Run.cpp startClickEle() carryAddressCurrent=%1, carryAddressTotal=%2").arg(ploop->carryAddressCurrent).arg(ploop->carryAddressTotal);
 
                     inum = 0;
 
                  }else {
                     // 固定元素，非固定元素
-                    qDebug() << QString("Run.cpp startClickEle() carryCurrent=%1, carryTotal=%2").arg(ploop->carryCurrent).arg(ploop->carryTotal);
+                    QLOG_INFO() << QString("Run.cpp startClickEle() carryCurrent=%1, carryTotal=%2").arg(ploop->carryCurrent).arg(ploop->carryTotal);
                     inum = ploop->carryCurrent;
                 }
 
@@ -320,7 +289,7 @@ void RunDialog::startClickEle(MFlowStepParamsClickEle *params){
         QTimer::singleShot(WAIT_SLEEP_UNIT*params->waitSleep,this,[this,script,params](){
              mWebviewManager->getCurrentWebView()->page()->runJavaScript(script,[this,params](const QVariant &v) {
                   QString feedback = v.toString();
-                  qDebug() << QString("Run.cpp startClickEle() feedback=%1").arg(feedback);
+                  QLOG_INFO() << QString("Run.cpp startClickEle() feedback=%1").arg(feedback);
 
                   if(feedback.startsWith("success")){
                       startClickEleRoll(params,feedback);
@@ -347,7 +316,7 @@ void RunDialog::startClickEleRoll(MFlowStepParamsClickEle *params, QString feedb
              mWebviewManager->getCurrentWebView()->page()->runJavaScript(QString("startRoll('%1','%2','%3')").arg(params->rollCount).arg(params->rollInterval).arg(params->rollTypeIndex),
                                                                     [this,params](const QVariant &v) {
                    QString rf = v.toString();
-                   qDebug() << QString("Run.cpp startClickEleRoll() dropdown.rf=%1").arg(rf);
+                   QLOG_INFO() << QString("Run.cpp startClickEleRoll() dropdown.rf=%1").arg(rf);
                    if(rf.startsWith("success")){
                        bool clickRollNext = rf.mid(8).startsWith("next")?true:false; // next 滚动存在，bottom 滚动已经到底部
                        endClickEle(params,clickRollNext);
@@ -411,10 +380,10 @@ void RunDialog::startExtract(MFlowStepParamsExtract * params){
                   return ;
                 }else if(ploop->loopTypeName==MCONSTANT_RADIO_SITEADDRESS){
                    // 网址列表的循环中，最后步骤的提取，一定是单独提取
-                  qDebug() << QString("Run.cpp startExtract() carryAddressCurrent=%1,carryAddressTotal=%2").arg(ploop->carryAddressCurrent).arg(ploop->carryAddressTotal);
+                  QLOG_INFO() << QString("Run.cpp startExtract() carryAddressCurrent=%1,carryAddressTotal=%2").arg(ploop->carryAddressCurrent).arg(ploop->carryAddressTotal);
                   inum = 0;
                 }else { // 固定或非固定
-                  qDebug() << QString("Run.cpp startExtract() carryCurrent=%1,carryTotal=%2").arg(ploop->carryCurrent).arg(ploop->carryTotal);
+                  QLOG_INFO() << QString("Run.cpp startExtract() carryCurrent=%1,carryTotal=%2").arg(ploop->carryCurrent).arg(ploop->carryTotal);
                   inum = ploop->carryCurrent;
                 }
             }else {// 非最后步骤
@@ -481,7 +450,7 @@ void RunDialog::startInput(MFlowStepParamsInput *params){
     QTimer::singleShot(WAIT_SLEEP_UNIT*params->waitSleep,this,[this,script,params](){
         mWebviewManager->getCurrentWebView()->page()->runJavaScript(script,[this,params](const QVariant &v) {
             QString feedback = v.toString();
-            qDebug() << QString("Run.cpp startInput() feedback=%1").arg(feedback);
+            QLOG_INFO() << QString("Run.cpp startInput() feedback=%1").arg(feedback);
             if(feedback.startsWith("success")){
                 endInput(params);
             }else{
@@ -495,7 +464,7 @@ void RunDialog::startInput(MFlowStepParamsInput *params){
 }
 
 void RunDialog::startLoopHead(MFlowStepParamsLoop * params){
-    qDebug() << "RunDialog startLoopHead() begin";
+    QLOG_INFO() << "RunDialog startLoopHead() begin";
 
     if (params->loopTypeName==MCONSTANT_RADIO_SINGLE) {
         // 单个元素 => 循环翻页 直接进入下一步
@@ -516,7 +485,7 @@ void RunDialog::startLoopHead(MFlowStepParamsLoop * params){
          QTimer::singleShot(WAIT_SLEEP_UNIT*params->waitSleep,this,[this,params,script](){
             mWebviewManager->getCurrentWebView()->page()->runJavaScript(script,[this,params](const QVariant &v) {
                 QString feedback = v.toString();
-                qDebug() << QString("Run.cpp startLoopHead() feedback=%1").arg(feedback);
+                QLOG_INFO() << QString("Run.cpp startLoopHead() feedback=%1").arg(feedback);
 
                 if(feedback.startsWith("success")){
                     int total = feedback.mid(8).toInt();
@@ -539,7 +508,7 @@ void RunDialog::startLoopHead(MFlowStepParamsLoop * params){
 
 }
 void RunDialog::startLoopTail(QString loopStepID,QString loopInnerLastStepID){
-      qDebug() << "RunDialog startLoopTail() begin";
+      QLOG_INFO() << "RunDialog startLoopTail() begin";
 
       MFlowStepParamsLoop * params = static_cast<MFlowStepParamsLoop *>(mHelper->m_stepsH[loopStepID]);
 
@@ -617,7 +586,7 @@ void RunDialog::startMouse(MFlowStepParamsMouse *params){
     QTimer::singleShot(WAIT_SLEEP_UNIT*params->waitSleep,this,[this,script,params](){
         mWebviewManager->getCurrentWebView()->page()->runJavaScript(script,[this,params](const QVariant &v) {
             QString feedback = v.toString();
-            qDebug() << QString("Run.cpp startMouse() feedback=%1").arg(feedback);
+            QLOG_INFO() << QString("Run.cpp startMouse() feedback=%1").arg(feedback);
 
             if(feedback.startsWith("success")){
                 endMouse(params);
@@ -795,9 +764,9 @@ void RunDialog::endMouse(MFlowStepParamsMouse *params){
 void RunDialog::sendStartJobCommand(){
     loadingLabel->show();
 
-    m_tbfields = mHelper->fields;// 用任务中的字段代替数据表的字段，并重新赋header
-    tableWidget->setColumnCount(m_tbfields.length());
-    tableWidget->setHorizontalHeaderLabels(m_tbfields);
+    mFields = mHelper->fields;// 用任务中的字段代替数据表的字段，并重新赋header
+    tableWidget->setColumnCount(mFields.length());
+    tableWidget->setHorizontalHeaderLabels(mFields);
 
     // 任务已经开始，可以做一些业务逻辑
     //TODO
@@ -812,7 +781,7 @@ void RunDialog::sendStartJobCommand(){
 
     mThreadPipline->sendStartCommand(mTask->runParams.loopPeriod);
 
-    updatePage(0,false);
+    updatePageData(0,false);
 
     QString lastStepID = NULL;//NULL开始的为从头开始执行
     startNextStep(lastStepID);
@@ -874,7 +843,7 @@ void RunDialog::onThreadPiplineAlert(int type,QString info){
 }
 
 void RunDialog::onThreadPiplineUpdateData(int num,QStringList names,QStringList values){
-    updatePage(num,true);
+    updatePageData(num,true);
 
     if(num%PAGESIZE==0){
         tableWidget->setRowCount(0);
@@ -983,23 +952,42 @@ void RunDialog::initWebViewUi(){
 //    boxLayout->addWidget(new ComLineWidget(this));
 //    boxLayout->addWidget(webViewWidget);
 }
-
-void RunDialog::updatePage(int num,bool isFinal){
+void RunDialog::updatePageData(int num,bool isShowLastPage){
     if(num==0){// num == 0 恢复为默认参数
-        m_currentPage = 1;
+        mCurPage = 1;
     }
     int totalPage = num / PAGESIZE; // 总页数
     if((num % PAGESIZE) > 0){
         totalPage +=1;
     }
-    m_totalPage = totalPage;
-
-    if(isFinal){// 是否显示最后的数据对应的页面
-        m_currentPage = m_totalPage;
+    mTotalPage = totalPage;
+    if(isShowLastPage){// 是否显示最后的数据对应的页面
+        mCurPage = mTotalPage;
     }
 
-    pageLabel->setText(QString::number(m_currentPage));
-    pageLogLabel->setText(QString("共计%1条，%2页").arg(num).arg(m_totalPage));
+    pageLabel->setText(QString::number(mCurPage));
+    pageLogLabel->setText(QString("共计%1条，%2页").arg(num).arg(mTotalPage));
+}
+void RunDialog::getData(int p){
+    mCurPage = p;
+    tableWidget->setRowCount(0);
+    tableWidget->clearContents();
+    QTimer::singleShot(100,this,[this](){
+        updatePageData(Database::getInstance()->getTableRowCount(mTask->code),false);//更新page
+        int fieldCount = mFields.length();
+        QString sql = QString("select %1 from %2 limit %3,%4 ").arg(mFields.join(",")).arg(mTask->code).arg(PAGESIZE * (mCurPage-1)).arg(PAGESIZE);
+        QVector<QVector<QString>> data = Database::getInstance()->select(fieldCount,sql);
+        tableWidget->setRowCount(data.size());
+
+        for (int row = 0; row < data.size(); ++row) {
+            tableWidget->setRowHeight(row,30);
+            for (int column = 0; column < fieldCount; ++column) {
+                QTableWidgetItem *item = new QTableWidgetItem(data[row][column]);
+                tableWidget->setItem(row,column,item);
+            }
+        }
+        tableWidget->scrollToBottom();
+    });
 }
 
 void RunDialog::initBottomUi(){
@@ -1062,7 +1050,7 @@ void RunDialog::initBottomUi(){
     pageLabel->setStyleSheet(m_stylesheet_QLabel12);
     pageLogLabel = new QLabel(this);
     pageLogLabel->setStyleSheet(m_stylesheet_QLabel12);
-    updatePage(0,false);
+    updatePageData(0,false);
 
     turnHLayout->addStretch(10);
     turnHLayout->addWidget(last);
@@ -1072,13 +1060,13 @@ void RunDialog::initBottomUi(){
     turnHLayout->addStretch(10);
 
     connect(last,&QToolButton::clicked,this,[this](){
-        if(m_currentPage>1){
-            loaddb(m_currentPage-1);
+        if(mCurPage>1){
+            getData(mCurPage-1);
         }
     });
     connect(next,&QToolButton::clicked,this,[this](){
-        if(m_currentPage<m_totalPage){
-            loaddb(m_currentPage+1);
+        if(mCurPage<mTotalPage){
+            getData(mCurPage+1);
         }
     });
 
@@ -1126,7 +1114,7 @@ void RunDialog::initBottomUi(){
         });
     }
     connect(exportBtn,&QPushButton::clicked,this,[this](){
-        TaskDataExport *exp = new TaskDataExport(mTask->name,mTask->code,this);
+        TaskDataExport *exp = new TaskDataExport(this,mTask->name,mTask->code);
         exp->setAttribute(Qt::WA_DeleteOnClose);
         exp->show();
     });

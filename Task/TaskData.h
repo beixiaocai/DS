@@ -1,42 +1,50 @@
-#ifndef TASKDATA_H
+﻿#ifndef TASKDATA_H
 #define TASKDATA_H
 
 #include <QWidget>
+#include <QHash>
+#include <QVector>
 QT_BEGIN_NAMESPACE;
 class QVBoxLayout;
-class QTableWidget;
 class QToolButton;
 class QLabel;
+class QTableWidget;
+class QListWidget;
+class QListWidgetItem;
 QT_END_NAMESPACE;
 class ComLoadingLabel;
-
+class TaskDataDownloadManager;
 
 class TaskData : public QWidget
 {
     Q_OBJECT
 public:
-    explicit TaskData(const QString &taskName,const QString &taskCode,QWidget *parent);
+    explicit TaskData(QWidget *parent,const QString &taskName,const QString &taskCode);
     ~TaskData();
 private:
     QVBoxLayout *boxLayout;
     void initMenuUi();
     ComLoadingLabel *loadingLabel;
 
-    void initTableWidget();
+    void initTableUi();
     QTableWidget* tableWidget;
+    void initBottomUi();
+    QListWidget *logListWidget;
+    QVector<QListWidgetItem *> logListWidgetItems_clear;
     QLabel *pageLabel;
     QLabel *pageLogLabel;
-    void updateTurnPage(int num,bool isFinal);
+
+    void updatePageData(int num,bool isShowLastPage);
 private:
-    QStringList m_tbfields;
+    QString mTaskName;
+    QString mTaskCode;
+    QStringList mFields;//任务采集数据的字段
+    QHash<QString,TaskDataDownloadManager *> mDownloadManagerH;
 
     void getData(int p = 1);
-    int  m_currentPage = 1;   // 当前页的页数
-    int  m_totalPage = 0; // 当前总页数
+    int  mCurPage = 1;   // 当前页的页数
+    int  mTotalPage = 0; // 当前总页数
 
-private:
-    QString m_taskName;
-    QString m_taskCode;
 signals:
 
 };

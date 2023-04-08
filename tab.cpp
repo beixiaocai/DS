@@ -15,13 +15,13 @@
 Tab::Tab(QWidget *parent) : QTabWidget(parent)
 {
 
-    QString stylesheet_QTabBar =  "QTabWidget::pane{} \
+    QString style =  "QTabWidget::pane{} \
               QTabBar::tab {color:rgb(0,0,0);font-family:Microsoft YaHei;font-size:13px;min-width:110px;height:30px;padding:0px 5px;border-radius:4px;margin-left:6px;margin-top:4px;margin-bottom:2px;} \
               QTabBar::tab:!selected {background:rgb(255,255,255);border:1px solid rgb(233,233,233);} \
-              QTabBar::tab:hover{background:rgba(255,255,255,0.8);} \
-              QTabBar::tab:selected  {background:rgb(219,228,241);}";
+              QTabBar::tab:hover{background:rgba(255,255,255,0.8);border-radius: 0px;} \
+              QTabBar::tab:selected  {background:rgb(219,228,241);border-radius: 0px;}";
 
-    setStyleSheet(stylesheet_QTabBar);
+    setStyleSheet(style);
     QTabBar *tabBar = this->tabBar();
     tabBar->setTabsClosable(true);
     tabBar->setSelectionBehaviorOnRemove(QTabBar::SelectPreviousTab);
@@ -124,7 +124,7 @@ void Tab::createTaskManage(){
         addTab(page,formatTabName("任务管理"));
         setCurrentWidget(page);
         connect(page,&TaskManage::notifyPageTaskData,this,[this](const QString &taskName,const QString &taskCode){
-            TaskData *page = new TaskData(taskName,taskCode,this);
+            TaskData *page = new TaskData(this,taskName,taskCode);
             addTab(page,formatTabName(taskName));
             setCurrentWidget(page);
         });
@@ -144,11 +144,8 @@ QString Tab::formatTabName(const QString &name){
     }
 }
 void Tab::setTask(MTask *task){
-
-    Task *page = new Task(task,this);
-
+    Task *page = new Task(this,task);
     addTab(page,formatTabName(task->name));
-
 
     setCurrentWidget(page);
     connect(page,&Task::notifyChangeTabName,this,[this,page](const QString &name){

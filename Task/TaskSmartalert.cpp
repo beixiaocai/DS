@@ -3,9 +3,8 @@
 #include "mCustomtaskSmartalertSelectall.h"
 #include "mCustomtaskSmartalertSuccess.h"
 #include "mCustomtaskSmartalertXpath.h"
-#include "mCustomtaskWebview.h"
-#include "mCustomtaskWebview.h"
-#include "mCustomtaskBridge.h"
+#include "TaskWebView.h"
+#include "TaskWebViewBridge.h"
 #include "Utils/models.h"
 #include "style.h"
 #include "TaskFlow/pageCustomtaskFlowControl.h"
@@ -31,7 +30,7 @@ TaskSmartalert::MEachP2::MEachP2(const QString eachp2){
 };
 TaskSmartalert::MEachP2::MEachP2(){};
 
-TaskSmartalert::TaskSmartalert(MCustomTaskWebView *webView, PageCustomTaskFlowControl *fc,QWidget *parent) :QDialog(parent),
+TaskSmartalert::TaskSmartalert(QWidget *parent,TaskWebView *webView,PageCustomTaskFlowControl *fc) :QDialog(parent),
     m_webView(webView),m_fc(fc)
 {
 
@@ -43,8 +42,7 @@ TaskSmartalert::TaskSmartalert(MCustomTaskWebView *webView, PageCustomTaskFlowCo
     setAttribute(Qt::WA_StyledBackground,true);
     setStyleSheet(QString(".TaskSmartalert{background-color:%1;}").arg(m_rgb_basic));
 
-    connect(m_webView->bridge,&MCustomTaskBridge::sendClickSignalToQt,this,&TaskSmartalert::onClickSignalToQt);
-
+    connect(m_webView->bridge,&TaskWebViewBridge::sendClickSignalToQt,this,&TaskSmartalert::onClickSignalToQt);
     connect(m_fc,&PageCustomTaskFlowControl::notificationToSmartAlertWidget,this,&TaskSmartalert::onNotificationFromFlowControl);
 
     boxLayout = new QVBoxLayout(this);

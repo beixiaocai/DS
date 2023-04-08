@@ -3,9 +3,10 @@
 * 作者：北小菜 
 * 邮箱：bilibili_bxc@126
 * 作者主页：http://www.any12345.com/user/4
-* 作者哔哩哔哩主页地址：https://space.bilibili.com/487906612
-* 软件介绍视频地址：https://www.bilibili.com/video/BV1uM4y167bg/
-* gitee开源地址：https://gitee.com/Vanishi/DS
+* 作者哔哩哔哩主页：https://space.bilibili.com/487906612
+* 软件哔哩哔哩讲解视频：https://www.bilibili.com/video/BV1uM4y167bg/
+* 软件gitee开源地址：ttps://gitee.com/Vanishi/DS
+* 软件github开源地址：https://github.com/any12345com/DS
 
 ### 软件介绍
 
@@ -17,16 +18,13 @@
 
 <img width="720" alt="软件主界面.png" src="https://gitee.com/Vanishi/DS/raw/master/res/images/main.png">
 
-### 软件开发环境
+### 软件开发环境（兼容Qt6）
+*  以下是作者经常编译的版本
 *  C++11
-*  Qt 5.15.2
-*  Qt Creator  9.0.2
-*  VS2019
-###### 注意 2023.3.26之后，V1.3及其之后的版本，已经兼容Qt6.4.3，当前软件开发环境
-*  C++11
-*  Qt 6.4.3
-*  Qt Creator  9.0.2
-*  VS2019
+*  QtCreator9.0.2 + Qt5.14.2 + VS2019
+*  QtCreator9.0.2 + Qt5.15.2 + VS2019
+*  QtCreator9.0.2 + Qt6.4.3 + VS2019
+*  推荐使用Qt6.x进行开发
 
 ### 安装开发环境需要注意的几点
 
@@ -40,9 +38,10 @@ Qt中只有MSVC系列的编译器才能使用这个控件，MinGW的编译器是
 
 - Qt版本和MSVC系列编译器版本的对应关系
 * 关于这个版本对应关系， 我并没有在官网找到相关描述，我所了解的几个版本关系如下：
-* Qt5.15.2 支持 VS2019
+
 * Qt5.14.2 支持 VS2019 和 VS2017
-* Qt6.4.3 支持 VS2019
+* Qt5.15.2 支持 VS2019
+* Qt6.4.3  支持 VS2019
 
 - 强烈建议大家先安装VS再安装Qt，如果先安装Qt再安装VS，需要手动配置编译器，很麻烦。
 - 希望大家能够尝试使用Qt6，因为这个软件的核心就是自动化控制内置的谷歌浏览器，

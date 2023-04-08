@@ -25,7 +25,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 #程序获取管理员权限 start
 #（注意：获取管理员权限以后，调试起来麻烦一些，建议在开发状态下，不要开启，这里之所以开启管理员权限）
-#QMAKE_LFLAGS += /MANIFESTUAC:\"level=\'requireAdministrator\' uiAccess=\'false\'\"
+# QMAKE_LFLAGS += /MANIFESTUAC:\"level=\'requireAdministrator\' uiAccess=\'false\'\"
 #程序获取管理员权限 end
 
 CONFIG += c++11

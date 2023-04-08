@@ -23,7 +23,7 @@
 #include <QNetworkProxy>
 #include <QScreen>
 #include <QRect>
-//#include <QsLog.h>
+#include <QsLog.h>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
@@ -41,7 +41,7 @@ MainWindow::MainWindow(QWidget *parent) :
     int initW = screenW * 1080 / 1920;
     int initH = initW * 720 / 1080;
 
-    qDebug() << "mainwindow.cpp: screens.size="<< screens.size()<<",screenW="<<screenW<<",screenH="<<screenH<<",initW="<<initW<<",initH="<<initH;
+    QLOG_INFO() << "MainWindow::MainWindow() screens.size="<< screens.size()<<",screenW="<<screenW<<",screenH="<<screenH<<",initW="<<initW<<",initH="<<initH;
     this->resize(initW,initH);
 
 //    qputenv("QTWEBENGINE_REMOTE_DEBUGGING", "9223");
@@ -55,7 +55,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     tabWidget = new Tab(this);
     setCentralWidget(tabWidget);
-    initData();
+
+    initSettings();
     tabWidget->createIndex();
 
 }
@@ -118,14 +119,12 @@ void MainWindow::initMenu(){
         QDesktopServices::openUrl(QUrl(URL_FEEDBACK));
     });
 
-
-
     QAction *logoutAct = helpMenu->addAction("退出");
     logoutAct->setShortcuts(QKeySequence::Quit);
     connect(logoutAct, &QAction::triggered, this, [this]() {
         switch (QMessageBox::information(this,"提示","确认要退出吗？","确定","取消",0)){
             case 0:{
-                qDebug() << "mainwindow.cpp: logout";
+                QLOG_INFO() << "mainwindow.cpp: logout";
                 QApplication* app;
                 app->quit();
                 break;
@@ -149,7 +148,7 @@ void MainWindow::initMenu(){
 
 }
 
-void MainWindow::initData(){
+void MainWindow::initSettings(){
 
     QSettings settings;
 
@@ -178,5 +177,6 @@ void MainWindow::initData(){
          finger = settings.value(SETTINGS_KEY_FINGER).toString();
     }
     Database::getInstance()->setFinger(finger);
-    qDebug() << "mainwindow.cpp: finger="<< Database::getInstance()->getFinger();
+
+    QLOG_INFO() << "MainWindow::initSettings() finger="<< Database::getInstance()->getFinger();
 }

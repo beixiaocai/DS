@@ -1,8 +1,7 @@
 ﻿#include "TaskDo.h"
 #include "TaskSmartalert.h"
-#include "mCustomtaskWebview.h"
-#include "mCustomtaskBrowserMenu.h"
-#include "mCustomtaskBridge.h"
+#include "TaskWebView.h"
+#include "TaskBrowserMenu.h"
 #include "TaskFlow/pageCustomtaskFlow.h"
 #include "TaskFlow/pageCustomtaskFlowControl.h"
 #include "Run/StartupDialog.h"
@@ -22,9 +21,9 @@
 #include <QMenu>
 #include <QAction>
 #include <QTimer>
-//#include <QsLog.h>
+#include <QsLog.h>
 
-TaskDo::TaskDo(MTask *task,QWidget *parent) : QWidget(parent),m_task(task){
+TaskDo::TaskDo(QWidget *parent,MTask *task) : QWidget(parent),m_task(task){
 
 
     boxLayout = new QVBoxLayout(this);
@@ -41,8 +40,8 @@ TaskDo::TaskDo(MTask *task,QWidget *parent) : QWidget(parent),m_task(task){
 TaskDo::~TaskDo()
 {
     disconnect(webView,0,0,0);
-
     delete webView;
+    webView = nullptr;
 }
 void TaskDo::startLoad(int msec){
     QTimer::singleShot(msec,this,[this](){
@@ -276,7 +275,7 @@ void TaskDo::initBottomUi(){
 
 
     //第二行
-    browserMenu = new MCustomTaskBrowserMenu(bottomWidget);
+    browserMenu = new TaskBrowserMenu(bottomWidget);
     browserMenu->setFixedHeight(30);
     browserMenu->hide();
 
@@ -286,8 +285,7 @@ void TaskDo::initBottomUi(){
     progressBar->setStyleSheet(QStringLiteral("QProgressBar {border: 0px} QProgressBar::chunk {background-color: #da4453}"));
 
     //第三行
-    webView = new MCustomTaskWebView(m_task,bottomWidget);
-
+    webView = new TaskWebView(bottomWidget,m_task);
 
     bottomLayout->addWidget(bottomMenuWidget);
     bottomLayout->addWidget(new ComLineWidget(this));
@@ -296,7 +294,7 @@ void TaskDo::initBottomUi(){
 
     bottomLayout->addWidget(webView);
 
-    connect(webView, &MCustomTaskWebView::urlChanged, this, [this](const QUrl &url){
+    connect(webView, &TaskWebView::urlChanged, this, [this](const QUrl &url){
          addrEdit->setText(url.url());
          addrEdit->setCursorPosition(0);
     });
@@ -367,7 +365,7 @@ void TaskDo::initBottomUi(){
 void TaskDo::initSmartAlertView(int msec){
     QTimer::singleShot(msec,this,[this](){
         if(flow!=nullptr){
-            smartAlertView = new TaskSmartalert(webView,flow->fc,this);
+            smartAlertView = new TaskSmartalert(this,webView,flow->fc);
             connect(smartAlertView,&TaskSmartalert::notifySmartAlertChecked,[this](bool checked){
                 if(checked&& smartAlertCheck->checkState()==Qt::CheckState::Checked){
                     // 显示命令 && 当前智能提示按钮显示选中 -> 则忽略
@@ -384,12 +382,10 @@ void TaskDo::initSmartAlertView(int msec){
 void TaskDo::loadUrl(QString url){
 
     if (url.startsWith("http://") || url.startsWith("https://")){
-
     }else{
         url ="http://"+url;
     }
-    qDebug() << "TaskDo.cpp: url="<<url;
-
+    QLOG_INFO() << "TaskDo::loadUrl() url="<<url;
     webView->load(QUrl(url));
     if(smartAlertCheck->checkState()==Qt::CheckState::Checked){
         // 如果当前智能提示框被选中，则重置显示

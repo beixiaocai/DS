@@ -3,15 +3,15 @@
 #include "TaskFlow/mFcModels.h"
 #include "TaskFlow/mTaskDeserialize.h"
 #include "RunDialog.h"
-#include <QDebug>
+
 
 RunHelper::RunHelper(QObject *parent) : QObject(parent){
     mTask = ((RunDialog *)parent)->getTask();
 
-    m_taskdeser = new MTaskDeserialize(mTask->program,this);
+    mTaskDeserialize = new MTaskDeserialize(mTask->program,this);
     int fieldindex = 0;
-    for (int i = 0; i < m_taskdeser->steps.length(); ++i) {
-        MFlowStepParams *params = m_taskdeser->steps[i];
+    for (int i = 0; i < mTaskDeserialize->steps.length(); ++i) {
+        MFlowStepParams *params = mTaskDeserialize->steps[i];
         if(MCONSTANT_FLOW_MENU_TYPE_ExtractBtn==params->menuType){
             // 提取字段控件参数
             MFlowStepParamsExtract *pe = static_cast<MFlowStepParamsExtract *>(params);
@@ -39,9 +39,11 @@ RunHelper::RunHelper(QObject *parent) : QObject(parent){
     }
 }
 RunHelper::~RunHelper(){
-    for (int i = 0; i < m_taskdeser->steps.length(); ++i) {
-        delete m_taskdeser->steps[i];
+    for (int i = 0; i < mTaskDeserialize->steps.length(); ++i) {
+        delete mTaskDeserialize->steps[i];
+        mTaskDeserialize->steps[i] = nullptr;
     }
+    mTaskDeserialize->steps.clear();
 
 }
 MTask * RunHelper::getTask(){
@@ -50,20 +52,19 @@ MTask * RunHelper::getTask(){
 MFlowStepParams * RunHelper::getNextStepParams(QString lastStepID){
 
     MFlowStepParams *np= nullptr;
-
-    int stepCount = m_taskdeser->steps.length();
+    int stepCount = mTaskDeserialize->steps.length();
 
     // 根据上一步的stepID，获取下一步的params
     if (stepCount > 0){
         if(lastStepID==""){
-            np= m_taskdeser->steps[0];
+            np= mTaskDeserialize->steps[0];
         }else {
             for (int i = 0; i < stepCount; ++i) {
-                MFlowStepParams *currentParams = m_taskdeser->steps[i];
+                MFlowStepParams *currentParams = mTaskDeserialize->steps[i];
                 if(lastStepID==currentParams->stepID){
                     int next = i+1;
                     if(next<stepCount){
-                        np = m_taskdeser->steps[next];
+                        np = mTaskDeserialize->steps[next];
                     }
                 }
             }

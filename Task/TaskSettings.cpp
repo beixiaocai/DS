@@ -16,7 +16,7 @@
 #include <QScrollBar>
 
 
-TaskSettings::TaskSettings(MTask *task,QWidget *parent) : QWidget(parent),
+TaskSettings::TaskSettings(QWidget *parent,MTask *task) : QWidget(parent),
     m_task(task)
 {
     QVBoxLayout *mainLayout = new QVBoxLayout(this);

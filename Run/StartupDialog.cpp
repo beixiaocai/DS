@@ -1,6 +1,6 @@
 ﻿#include "StartupDialog.h"
-#include "StartupBox.h"
 #include "Utils/ComLineWidget.h"
+#include "Utils/ComOptionsBox.h"
 #include "Utils/models.h"
 #include "RunDialog.h"
 #include "style.h"
@@ -12,10 +12,11 @@
 #include <QLabel>
 #include <QStackedWidget>
 #include <QTimer>
+#include <QsLog.h>
 
 StartupDialog::StartupDialog(MTask *task) : mTask(task),QDialog(nullptr)
 {
-    qDebug()<<"StartupDialog::StartupDialog()";
+    QLOG_INFO()<<"StartupDialog::StartupDialog()";
     resize(600,400);
 
     setWindowFlags(Qt::Dialog| Qt::WindowCloseButtonHint);
@@ -53,7 +54,7 @@ StartupDialog::StartupDialog(MTask *task) : mTask(task),QDialog(nullptr)
 
 }
 StartupDialog::~StartupDialog(){
-    qDebug()<<"StartupDialog::~StartupDialog()";
+    QLOG_INFO()<<"StartupDialog::~StartupDialog()";
     if(mTask){
         delete mTask ;
         mTask = nullptr;
@@ -80,25 +81,25 @@ void StartupDialog::initRightTimedStartUi(){
     introHLayout->addStretch(10);
 
 
-    StartupBox *startupBox = new StartupBox(rightTimedStartWidget);
+    ComOptionsBox *optionsBox = new ComOptionsBox(rightTimedStartWidget,"高级选项");
 
 
     //是否循环采集 start
-    rightLoopCb = new QCheckBox(startupBox->gWidget);
+    rightLoopCb = new QCheckBox(optionsBox->gWidget);
     rightLoopCb->setStyleSheet(m_stylesheet_QCheckBox);
     rightLoopCb->setText("循环采集");
     rightLoopCb->setChecked(true);
 
-    startupBox->gLayout->addWidget(rightLoopCb,startupBox->rowStart,0);
-    ++startupBox->rowStart;
+    optionsBox->gLayout->addWidget(rightLoopCb,optionsBox->rowStart,0);
+    ++optionsBox->rowStart;
     //是否循环采集 send
 
 
     //循环间隔时间 start
-    QLabel *intervalLabel = new QLabel(startupBox->gWidget);
+    QLabel *intervalLabel = new QLabel(optionsBox->gWidget);
     intervalLabel->setStyleSheet(m_stylesheet_QLabel);
     intervalLabel->setText("循环间隔时间");
-    rightLoopIntervalSpin = new QSpinBox(startupBox->gWidget);
+    rightLoopIntervalSpin = new QSpinBox(optionsBox->gWidget);
     rightLoopIntervalSpin->setMinimum(1);
     rightLoopIntervalSpin->setMaximum(1440);
     rightLoopIntervalSpin->setSuffix("分钟");
@@ -106,20 +107,20 @@ void StartupDialog::initRightTimedStartUi(){
     rightLoopIntervalSpin->setStyleSheet(m_stylesheet_QSpinBox);
     rightLoopIntervalSpin->setValue(10);
 
-    startupBox->gLayout->addWidget(intervalLabel,startupBox->rowStart,0);
-    startupBox->gLayout->addWidget(rightLoopIntervalSpin,startupBox->rowStart,1);
-    ++startupBox->rowStart;
+    optionsBox->gLayout->addWidget(intervalLabel,optionsBox->rowStart,0);
+    optionsBox->gLayout->addWidget(rightLoopIntervalSpin,optionsBox->rowStart,1);
+    ++optionsBox->rowStart;
 
     //循环间隔时间 end
 
 
     //单次运行时间 start
 
-    QLabel *singleLabel = new QLabel(startupBox->gWidget);
+    QLabel *singleLabel = new QLabel(optionsBox->gWidget);
     singleLabel->setStyleSheet(m_stylesheet_QLabel);
     singleLabel->setText("循环单次时长");
 
-    rightLoopSingleSpin = new QSpinBox(startupBox->gWidget);
+    rightLoopSingleSpin = new QSpinBox(optionsBox->gWidget);
     rightLoopSingleSpin->setMinimum(0);
     rightLoopSingleSpin->setMaximum(0);
     rightLoopSingleSpin->setSuffix("分钟");
@@ -127,14 +128,14 @@ void StartupDialog::initRightTimedStartUi(){
     rightLoopSingleSpin->setStyleSheet(m_stylesheet_QSpinBox);
     rightLoopSingleSpin->setValue(0);
 
-    QLabel *singleRemarkLabel = new QLabel(startupBox->gWidget);
+    QLabel *singleRemarkLabel = new QLabel(optionsBox->gWidget);
     singleRemarkLabel->setStyleSheet(m_stylesheet_QLabel);
     singleRemarkLabel->setText("0表示不限制单次时长");
 
-    startupBox->gLayout->addWidget(singleLabel,startupBox->rowStart,0);
-    startupBox->gLayout->addWidget(rightLoopSingleSpin,startupBox->rowStart,1);
-    startupBox->gLayout->addWidget(singleRemarkLabel,startupBox->rowStart,2);
-    ++startupBox->rowStart;
+    optionsBox->gLayout->addWidget(singleLabel,optionsBox->rowStart,0);
+    optionsBox->gLayout->addWidget(rightLoopSingleSpin,optionsBox->rowStart,1);
+    optionsBox->gLayout->addWidget(singleRemarkLabel,optionsBox->rowStart,2);
+    ++optionsBox->rowStart;
     //循环间隔时间 end
 
 
@@ -176,7 +177,7 @@ void StartupDialog::initRightTimedStartUi(){
     vLayout->addSpacing(30);
     vLayout->addWidget(introWidget);
     vLayout->addSpacing(10);
-    vLayout->addWidget(startupBox);
+    vLayout->addWidget(optionsBox);
     vLayout->addStretch(10);
     vLayout->addWidget(submitWidget);
     vLayout->addSpacing(30);

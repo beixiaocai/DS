@@ -5,8 +5,10 @@
 #include "RunDialog.h"
 #include "RunHelper.h"
 #include <QHash>
-#include <QDebug>
+#if (QT_VERSION >= QT_VERSION_CHECK(6,0,0))
 #include <QtCore5Compat>
+#endif
+#include <QsLog.h>
 
 static int64_t getCurTimestamp()// 获取毫秒级时间戳（13位）
 {
@@ -107,7 +109,7 @@ void RunThreadPipline::sendStopCommand(){
 }
 
 void RunThreadPipline::run(){
-    qDebug()<<"RunThreadPipline::run()";
+    QLOG_INFO()<<"RunThreadPipline::run()";
 
     if(1==mJobPeriod){
         //删除之前的任务数据表
@@ -227,7 +229,7 @@ QString RunThreadPipline::calcuDataFinger(const QStringList& values){
     return fingerprint;
 }
 void RunThreadPipline::onPushData(QString stepID,QString res){
-//    qDebug()<<"onPushData "<<stepID<<res;
+//    QLOG_INFO()<<"onPushData "<<stepID<<res;
     if(""!=res){
         MExtractSingleData singleData(stepID);
         QStringList fields = res.split(SEPARATOR_WEBDATA_ARRAY);
@@ -241,7 +243,7 @@ void RunThreadPipline::onPushData(QString stepID,QString res){
                 MExtractSingleItem item(name,value);
                 singleData.items.append(item);
             }else {
-                qDebug()<<"onPushData Error："<<res<<"attres"<<attrs;
+                QLOG_INFO()<<"onPushData Error："<<res<<"attres"<<attrs;
             }
 
         }

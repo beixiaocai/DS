@@ -22,15 +22,14 @@
 QXLSX_USE_NAMESPACE
 
 
-TaskDataExport::TaskDataExport(const QString &taskName,const QString &taskCode,QWidget *parent) : QDialog(parent){
+TaskDataExport::TaskDataExport(QWidget *parent,const QString &taskName,const QString &taskCode) :
+    QDialog(parent),mTaskName(taskName),mTaskCode(taskCode){
 
     setFixedSize(520,200);
 
     Qt::WindowFlags flags=Qt::Dialog;
     flags |=Qt::WindowCloseButtonHint;
     setWindowFlags(flags);
-    m_taskName = taskName;
-    m_taskCode = taskCode;
     setAttribute(Qt::WA_StyledBackground,true);
     setStyleSheet(".TaskDataExport{background-color:rgb(255,255,255);}");
     setWindowTitle("导出："+taskName);
@@ -74,9 +73,10 @@ TaskDataExport::TaskDataExport(const QString &taskName,const QString &taskCode,Q
     exportBoxLayout->addWidget(xlsxRadio);
     exportBoxLayout->addWidget(csvRadio);
     exportBoxLayout->addStretch(10);
-    QButtonGroup *gs = new QButtonGroup(this);
-    gs->addButton(xlsxRadio);
-    gs->addButton(csvRadio);
+
+    QButtonGroup *radioBtns = new QButtonGroup(this);
+    radioBtns->addButton(xlsxRadio);
+    radioBtns->addButton(csvRadio);
 
     boxLayout->addWidget(exportBox);
     boxLayout->addSpacing(10);
@@ -107,17 +107,17 @@ TaskDataExport::TaskDataExport(const QString &taskName,const QString &taskCode,Q
     okBtn->setFixedSize(80,28);
 
 
-    connect(gs, QOverload<QAbstractButton *>::of(&QButtonGroup::buttonClicked),[xlsxRadio,sheetSpin](QAbstractButton *button){
-        QRadioButton *clickedRadio = static_cast<QRadioButton *>(button);
-        if(clickedRadio==xlsxRadio){
+    connect(radioBtns, QOverload<QAbstractButton *>::of(&QButtonGroup::buttonClicked),[xlsxRadio,sheetSpin](QAbstractButton *button){
+        QRadioButton *selectedRadio = static_cast<QRadioButton *>(button);
+        if(selectedRadio==xlsxRadio){
              sheetSpin->show();
         }else{
              sheetSpin->hide();
         }
 
     });
-    connect(okBtn,&QPushButton::clicked,this,[this,gs,xlsxRadio,sheetSpin](){
-        if(gs->checkedButton()==xlsxRadio){
+    connect(okBtn,&QPushButton::clicked,this,[this,radioBtns,xlsxRadio,sheetSpin](){
+        if(radioBtns->checkedButton()==xlsxRadio){
             exportXlsx(sheetSpin->value);
         }else{
             ComMessageBox::error(this,"暂时只支持xlsx格式导出");
@@ -156,8 +156,8 @@ void TaskDataExport::exportXlsx(int sheetSize){
         QTimer::singleShot(200,[this,dir,sheetSize](){
 
             // 查询数据
-            QStringList tbfields = Database::getInstance()->getTableFields(m_taskCode);
-            int queryColumnCount = tbfields.length();
+            QStringList fields = Database::getInstance()->getTableFields(mTaskCode);
+            int queryColumnCount = fields.length();
 
             int dbsize = 30;// 每页查询数据的数量
             int dbstart = 0;// 本页查询起始点
@@ -171,12 +171,12 @@ void TaskDataExport::exportXlsx(int sheetSize){
             xlsx.setColumnWidth(1,queryColumnCount,20);
 
             for (int column = 1; column <= queryColumnCount; ++column) {
-                xlsx.write(sheetRow,column,tbfields[column-1]);
+                xlsx.write(sheetRow,column,fields[column-1]);
             }
 
             while (true) {
                 QVector<QVector<QString>> data = Database::getInstance()->select(queryColumnCount,
-                        QString("select %1 from %2 limit %3,%4 ").arg(tbfields.join(",")).arg(m_taskCode).arg(dbstart).arg(dbsize)
+                        QString("select %1 from %2 limit %3,%4 ").arg(fields.join(",")).arg(mTaskCode).arg(dbstart).arg(dbsize)
                      );
                 for (int d = 0; d < data.length(); ++d) {
                     dbtotal +=1;
@@ -199,7 +199,7 @@ void TaskDataExport::exportXlsx(int sheetSize){
             }
            QString filename = QString("%1/%2-%3.xlsx").
                    arg(dir).
-                   arg(m_taskName).
+                   arg(mTaskName).
                    arg(QDateTime::currentDateTime().toLocalTime().toString("yyyyMMddhhmm"));
 
            xlsx.saveAs(filename);

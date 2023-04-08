@@ -2,7 +2,9 @@
 #include "style.h"
 #include <QLabel>
 #include <QHBoxLayout>
+#if (QT_VERSION >= QT_VERSION_CHECK(6,0,0))
 #include <QtCore5Compat>
+#endif
 #include <QDebug>
 MCustomTaskSmartAlertXPath::MCustomTaskSmartAlertXPath(QWidget *parent) : QWidget(parent)
 {
@@ -23,8 +25,11 @@ void MCustomTaskSmartAlertXPath::setXpath(const QString &xpath){
         xpathLabel->setText(xpath);
     }else{
         QString x = xpath;
-//        x.replace(QRegExp("\\[\\d+\\]"),"");sunqt6
+#if (QT_VERSION >= QT_VERSION_CHECK(6,0,0))
         x.replace(QRegularExpression("\\[\\d+\\]"),"");
+#else
+        x.replace(QRegExp("\\[\\d+\\]"),"");
+#endif
         x.replace("/html/body/","");
 
         QStringList xs = x.split("/");

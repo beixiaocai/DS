@@ -9,7 +9,7 @@
 #include "style.h"
 #include "Utils/models.h"
 #include <QCloseEvent>
-#include <QDebug>
+
 RunMessage::RunMessage(QWidget *parent) : QDialog(parent)
 {
     MTask *task = ((RunDialog *)parent)->getTask();

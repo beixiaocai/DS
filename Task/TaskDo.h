@@ -11,10 +11,10 @@ class QProgressBar;
 QT_END_NAMESPACE;
 
 class ComLoadingLabel;
-class MCustomTaskWebView;
+class TaskWebView;
 class PageCustomTaskFlow;
 class TaskSmartalert;
-class MCustomTaskBrowserMenu;
+class TaskBrowserMenu;
 struct MTask;
 
 class TaskDo : public QWidget
@@ -22,7 +22,7 @@ class TaskDo : public QWidget
     Q_OBJECT
 
 public:
-    explicit TaskDo(MTask *task,QWidget *parent = nullptr);
+    explicit TaskDo(QWidget *parent,MTask *task);
     ~TaskDo();
 
      void startLoad(int msec=50);
@@ -46,8 +46,8 @@ private:
     QCheckBox *smartAlertCheck;
     QProgressBar *progressBar;
 
-    MCustomTaskBrowserMenu *browserMenu;// 浏览模式的菜单
-    MCustomTaskWebView *webView;
+    TaskBrowserMenu *browserMenu;// 浏览模式的菜单
+    TaskWebView *webView;
     TaskSmartalert *smartAlertView = nullptr;
     void initSmartAlertView(int msec);
 

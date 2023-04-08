@@ -27,7 +27,7 @@ public:
     QHash<QString,MFlowStepParams*> m_stepsH;
 private:
     MTask *mTask;
-    MTaskDeserialize *m_taskdeser;
+    MTaskDeserialize *mTaskDeserialize;
 
 
 signals:

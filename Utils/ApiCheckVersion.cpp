@@ -15,7 +15,7 @@
 #include <QJsonParseError>
 #include <QMutex>
 #include <QMutexLocker>
-//#include <QsLog.h>
+#include <QsLog.h>
 
 QAtomicPointer<ApiCheckVersion> ApiCheckVersion::mInstance = 0;
 QMutex ApiCheckVersion::mInstanceMtx;
@@ -26,26 +26,27 @@ ApiCheckVersion::ApiCheckVersion(QObject *parent) : QObject(parent)
 //    QNetworkCookieJar *cookieJar =  new QNetworkCookieJar(manager);
 //    cookieJar->setCookiesFromUrl(networkManager->cookieJar()->cookiesForUrl(qurl),qurl);
 //    manager->setCookieJar(cookieJar);
-    connect(mNetworkManager,&QNetworkAccessManager::finished, this,&ApiCheckVersion::replyFinished);
+    connect(mNetworkManager,&QNetworkAccessManager::finished, this,&ApiCheckVersion::onRequestFinished);
 
 }
 ApiCheckVersion::~ApiCheckVersion(){
-
+    if(mNetworkManager){
+        mNetworkManager->disconnect();
+        delete mNetworkManager;
+        mNetworkManager = nullptr;
+    }
 }
 ApiCheckVersion * ApiCheckVersion::getInstance(){
     //! testAndSetOrders操作保证在原子操作前和后的的内存访问 不会被重新排序。
     if(mInstance.testAndSetOrdered(0,0)){
         QMutexLocker locker(&mInstanceMtx);
-        mInstance.testAndSetOrdered(0,new ApiCheckVersion());
+        mInstance.testAndSetOrdered(0,new ApiCheckVersion(nullptr));
     }
     return mInstance;
 
 }
 
-
-void ApiCheckVersion::replyFinished(QNetworkReply *reply){
-    qDebug() <<"ApiCheckVersion::replyFinished begin";
-
+void ApiCheckVersion::onRequestFinished(QNetworkReply *reply){
     reply->abort();
     reply->deleteLater();
 
@@ -74,8 +75,9 @@ void ApiCheckVersion::replyFinished(QNetworkReply *reply){
             }
         }
     }
-    qDebug() <<"ApiCheckVersion::replyFinished state="<<state<<",msg="<<msg;
+    QLOG_INFO() <<"ApiCheckVersion::onRequestFinished state="<<state<<",msg="<<msg;
     emit this->notifyCheckVersion(state,msg,version);
+
 }
 
 void ApiCheckVersion::checkVersion(){
@@ -109,8 +111,9 @@ void ApiCheckVersion::checkVersion(){
     for (it=params.constBegin();it!=params.constEnd();++it) {
         url +="&"+it.key()+"="+it.value();
     }
+//    QLOG_INFO() <<"ApiCheckVersion::checkVersionh url="<<url;
+
     QUrl qurl(url);
     QNetworkRequest request(qurl);
     mNetworkManager->get(request);
 }
-

@@ -27,7 +27,7 @@ private:
     void initRightUi();
     QWidget *rightWidget;
     QVBoxLayout *rightScrollWidgetLayout;
-    float m_leftratio = 0.45;
+    double m_leftratio = 0.45;
 
 protected:
     void resizeEvent(QResizeEvent *event) override;

@@ -15,7 +15,7 @@ public:
 private:
     Tab *tabWidget;
     void initMenu();
-    void initData();
+    void initSettings();
 
 signals:
 

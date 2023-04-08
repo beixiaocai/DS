@@ -5,7 +5,7 @@
 QT_BEGIN_NAMESPACE;
 class QVBoxLayout;
 QT_END_NAMESPACE;
-class Report;
+class ReportThread;
 class Index : public QWidget
 {
     Q_OBJECT
@@ -15,7 +15,7 @@ public:
 private:
     QVBoxLayout *mainLayout;
     void initUI();
-    Report *mReport;
+    ReportThread *mReportThread;
 
 signals:
     void notifyCreateTask(const QString address);

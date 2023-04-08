@@ -24,8 +24,6 @@
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QTimer>
-#include <QDebug>
-
 
 TaskManage::TaskManage(QWidget *parent) :QWidget(parent)
 {
@@ -128,7 +126,7 @@ void TaskManage::initRowMenu(){
     QAction *editA =  rowMenu->addAction(tr("编辑任务"));
     QAction *delA =   rowMenu->addAction(tr("删除任务"));
     QAction *exportA= rowMenu->addAction(tr("导出任务"));
-    QAction *dataA =  rowMenu->addAction(tr("查看数据"));
+    QAction *dataA =  rowMenu->addAction(tr("管理数据"));
     QAction *exportdataA = rowMenu->addAction(tr("导出数据"));
 
 
@@ -186,7 +184,7 @@ void TaskManage::initRowMenu(){
     });
     connect(exportdataA, &QAction::triggered, this,[this](){
         // 导出数据
-        TaskDataExport *exp = new TaskDataExport(mCurTask->name,mCurTask->code,this);
+        TaskDataExport *exp = new TaskDataExport(this,mCurTask->name,mCurTask->code);
         exp->setAttribute(Qt::WA_DeleteOnClose);
         exp->show();
     });

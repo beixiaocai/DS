@@ -2,7 +2,7 @@
 #include "Utils/ComLineWidget.h"
 #include "Utils/models.h"
 #include "Utils/ApiCheckVersion.h"
-#include "Report.h"
+#include "ReportThread.h"
 #include "style.h"
 #include "Version.h"
 #include "Utils/constant.h"
@@ -27,8 +27,9 @@ Index::Index(QWidget *parent) : QWidget(parent)
 
     initUI();
     if(IS_reportHeart){
-        mReport= new Report;
-        mReport->start();
+        mReportThread= new ReportThread(this);
+        mReportThread->start();
+
     }
 
     connect(ApiCheckVersion::getInstance(),&ApiCheckVersion::notifyCheckVersion,this,[this](bool state,QString &msg,MVersion &version){
@@ -46,9 +47,9 @@ Index::Index(QWidget *parent) : QWidget(parent)
 }
 Index::~Index(){
     if(IS_reportHeart){
-        if(mReport){
-            delete mReport;
-            mReport = nullptr;
+        if(mReportThread){
+            delete mReportThread;
+            mReportThread = nullptr;
         }
     }
 }
@@ -111,22 +112,22 @@ void Index::initUI(){
     inputLine->addAction(inputAction,QLineEdit::LeadingPosition);
 
 
-    QPushButton *customTaskBtn = new QPushButton(taskWidget);
-    customTaskBtn->setCursor(Qt::PointingHandCursor);
-    customTaskBtn->setFixedSize(110,35);
-    customTaskBtn->setStyleSheet(m_stylesheet_QPushButton_hollow);
-    customTaskBtn->setText("新建任务");
-    customTaskBtn->setIcon(QIcon(":/res/images/icon/mainwindow/add.png"));
-    customTaskBtn->setIconSize(QSize(20,20));
+    QPushButton *addTaskBtn = new QPushButton(taskWidget);
+    addTaskBtn->setCursor(Qt::PointingHandCursor);
+    addTaskBtn->setFixedSize(110,35);
+    addTaskBtn->setStyleSheet(m_stylesheet_QPushButton_hollow);
+    addTaskBtn->setText("新建任务");
+    addTaskBtn->setIcon(QIcon(":/res/images/icon/mainwindow/add.png"));
+    addTaskBtn->setIconSize(QSize(20,20));
 
 
     taskHLayout->addStretch(10);
     taskHLayout->addWidget(inputLine);
     taskHLayout->addSpacing(10);
-    taskHLayout->addWidget(customTaskBtn);
+    taskHLayout->addWidget(addTaskBtn);
     taskHLayout->addStretch(10);
 
-    connect(customTaskBtn,&QPushButton::clicked,this,[this,inputLine](){
+    connect(addTaskBtn,&QPushButton::clicked,this,[this,inputLine](){
         QString address = inputLine->text().trimmed();
         emit this->notifyCreateTask(address);
 

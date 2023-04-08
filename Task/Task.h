@@ -16,17 +16,17 @@ class Task : public QWidget
 {
     Q_OBJECT
 public:
-    explicit Task(MTask *task,QWidget *parent);
+    explicit Task(QWidget *parent,MTask *task);
     ~Task();
 
 private:
-    MTask *m_task;
+    MTask *mTask;
     QStackedWidget *stackedWidget;
 
     void initAddView();
     QWidget *addView;
     QComboBox *groupComboBox;
-    QVector<MTaskGroup> m_taskGroups;
+    QVector<MTaskGroup> mTaskGroups;
 
     int m_currentGroupId = 0;
     void initAddViewDo();

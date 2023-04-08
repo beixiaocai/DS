@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Razvan Petru
+﻿// Copyright (c) 2013, Razvan Petru
 // All rights reserved.
 
 // Redistribution and use in source and binary forms, with or without modification,
@@ -126,7 +126,11 @@ QsLogging::FileDestination::FileDestination(const QString& filePath, RotationStr
     if (!mFile.open(QFile::WriteOnly | QFile::Text | mRotationStrategy->recommendedOpenModeFlag()))
         std::cerr << "QsLog: could not open log file " << qPrintable(filePath);
     mOutputStream.setDevice(&mFile);
+
+#if (QT_VERSION < QT_VERSION_CHECK(6,0,0))
+//TODO sunqt6
     mOutputStream.setCodec(QTextCodec::codecForName("UTF-8"));
+#endif
 
     mRotationStrategy->setInitialInfo(mFile);
 }
@@ -143,8 +147,13 @@ void QsLogging::FileDestination::write(const QString& message, Level)
         mRotationStrategy->setInitialInfo(mFile);
         mOutputStream.setDevice(&mFile);
     }
-
+#if (QT_VERSION >= QT_VERSION_CHECK(6,0,0))
+//TODO sunqt6
+    mOutputStream << message << "\n";
+#else
     mOutputStream << message << endl;
+#endif
+
     mOutputStream.flush();
 }
 

@@ -13,6 +13,8 @@ class MFlowStepMenuDialog : public QDialog
     Q_OBJECT
 public:
     explicit MFlowStepMenuDialog(QWidget *parent);
+    ~MFlowStepMenuDialog();
+public:
     QPushButton *deleteBtn;
 signals:
 

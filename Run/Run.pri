@@ -7,7 +7,6 @@ HEADERS += \
     $$PWD/RunThreadPipline.h \
     $$PWD/RunHelper.h \
     $$PWD/RunWebviewManager.h \
-    $$PWD/StartupBox.h \
     $$PWD/StartupDialog.h
  
 SOURCES += \
@@ -18,7 +17,6 @@ SOURCES += \
     $$PWD/RunThreadPipline.cpp \
     $$PWD/RunHelper.cpp \
     $$PWD/RunWebviewManager.cpp \
-    $$PWD/StartupBox.cpp \
     $$PWD/StartupDialog.cpp
 
 INCLUDEPATH += Run

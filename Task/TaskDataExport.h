@@ -9,13 +9,13 @@ class TaskDataExport : public QDialog
 {
     Q_OBJECT
 public:
-    explicit TaskDataExport(const QString &taskName,const QString &taskCode,QWidget *parent);
+    explicit TaskDataExport(QWidget *parent,const QString &taskName,const QString &taskCode);
     ~TaskDataExport();
 
 private:
+    QString mTaskName;
+    QString mTaskCode;
     ComLoadingLabel *loadingLabel;
-    QString m_taskName;
-    QString m_taskCode;
     void exportXlsx(int sheetSize);
 
 signals:

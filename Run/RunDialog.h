@@ -1,17 +1,18 @@
-#ifndef RUNDIALOG_H
+﻿#ifndef RUNDIALOG_H
 #define RUNDIALOG_H
 
 #include <QDialog>
-#include <QtCore5Compat>
 #include "RunMessage.h"
+
 
 QT_BEGIN_NAMESPACE;
 class QVBoxLayout;
 class QHBoxLayout;
 class QStackedWidget;
-class QTableWidget;
 class QToolButton;
 class QLineEdit;
+class QTableWidget;
+class QTableWidgetItem;
 QT_END_NAMESPACE;
 
 class RunThreadPipline;
@@ -59,15 +60,15 @@ private:
     QPushButton *exportBtn;
     QPushButton *startBtn;
     QPushButton *stopBtn;
-    void updatePage(int num,bool isFinal);
+    void updatePageData(int num,bool isShowLastPage);
 
-    QStringList m_tbfields;
+    QStringList mFields;
 private:
     MTask *mTask;
-    RunThreadPipline *mThreadPipline = nullptr;
-    RunHelper *mHelper = nullptr;
-    RunMessage *mMessage = nullptr;
-    RunWebViewManager *mWebviewManager = nullptr;
+    RunThreadPipline *mThreadPipline;
+    RunHelper *mHelper;
+    RunMessage *mMessage;
+    RunWebViewManager *mWebviewManager;
 
     void startNextStep(QString lastStepID);
 
@@ -91,9 +92,9 @@ private:
     RunMessage::MessageType mSendStopMessageType;
     QString                 mSendStopMsg;
 
-    void loaddb(int p = 1);
-    int  m_currentPage = 1;   // 当前页的页数
-    int  m_totalPage = 0; // 当前总页数
+    void getData(int p = 1);
+    int  mCurPage = 1;   // 当前页的页数
+    int  mTotalPage = 0; // 当前总页数
 
 public:
     RunHelper *getHelper();

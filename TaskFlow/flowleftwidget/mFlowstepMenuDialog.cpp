@@ -2,11 +2,11 @@
 #include <QVBoxLayout>
 #include <QPushButton>
 #include "style.h"
-
+#include <QsLog.h>
 
 MFlowStepMenuDialog::MFlowStepMenuDialog(QWidget *parent) : QDialog(parent)
 {
-
+    QLOG_INFO()<<"MFlowStepMenuDialog::MFlowStepMenuDialog()";
     //设置模态
     setWindowModality(Qt::ApplicationModal);
     // 隐藏？号
@@ -14,7 +14,7 @@ MFlowStepMenuDialog::MFlowStepMenuDialog(QWidget *parent) : QDialog(parent)
     setWindowTitle("操作选项");
     setStyleSheet(".MFlowStepMenuDialog{background-color:rgb(246,247,251);}");
 
-    setFixedSize(120,60);
+    setFixedSize(160,80);
 
     QVBoxLayout *boxLayout = new QVBoxLayout(this);
     boxLayout->setContentsMargins(0,0,0,0);
@@ -27,4 +27,7 @@ MFlowStepMenuDialog::MFlowStepMenuDialog(QWidget *parent) : QDialog(parent)
     boxLayout->addWidget(deleteBtn,0,Qt::AlignHCenter);
 
 
+}
+MFlowStepMenuDialog::~MFlowStepMenuDialog(){
+    QLOG_INFO()<<"MFlowStepMenuDialog::~MFlowStepMenuDialog()";
 }

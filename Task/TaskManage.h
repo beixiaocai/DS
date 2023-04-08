@@ -1,4 +1,4 @@
-#ifndef TASKMANAGE_H
+﻿#ifndef TASKMANAGE_H
 #define TASKMANAGE_H
 
 #include <QWidget>
@@ -14,7 +14,6 @@ class ComLoadingLabel;
 class ComLoadingWidget;
 struct MTask;
 struct MTaskGroup;
-
 class TaskManage : public QWidget
 {
     Q_OBJECT
