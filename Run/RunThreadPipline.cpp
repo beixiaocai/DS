@@ -10,19 +10,7 @@
 #endif
 #include <QsLog.h>
 
-static int64_t getCurTimestamp()// 获取毫秒级时间戳（13位）
-{
-    return std::chrono::duration_cast<std::chrono::milliseconds>(
-        std::chrono::system_clock::now().time_since_epoch()).
-        count();
 
-}
-static int getCurTimestamp_second()// 获取秒级时间戳（10位）
-{
-    int64_t curTimestamp = getCurTimestamp();
-
-    return int(curTimestamp/1000);
-}
 
 MExtractSingleItem::MExtractSingleItem(){
 
@@ -92,7 +80,7 @@ void RunThreadPipline::sendStartCommand(int jobPeriod){
     mJobRepeatCount = 0;
     mJobStartDate = QDateTime::currentDateTime();
 //    mJobStartStamp = mJobStartDate.toTime_t();sunqt6
-    mJobStartStamp = getCurTimestamp_second();
+    mJobStartStamp = mJobStartDate.toSecsSinceEpoch();
 
     if(1==mJobPeriod){
         mTotalJobCount = 0;
@@ -189,9 +177,8 @@ void RunThreadPipline::run(){
                 emit this->notifyAlert(11,"内存使用率超过上限95%，采集被强制停止");
                 jobFinished = true;
             }else{
-    //                int seconds = QDateTime::currentDateTime().toTime_t() - mJobStartStamp;sunqt6
-
-                int seconds = getCurTimestamp_second() - mJobStartStamp;
+    //          int seconds = QDateTime::currentDateTime().toTime_t() - mJobStartStamp;sunqt6
+                int seconds = QDateTime::currentDateTime().toSecsSinceEpoch() - mJobStartStamp;
                 float speed = mJobCount * 60 / seconds;
 
                 QString info = QString("所有周期采集条数:%1，当前周期:%2，采集%3条（重复%4条），已用时:%5秒，平均速度:%6条/分钟  内存（%7%）").

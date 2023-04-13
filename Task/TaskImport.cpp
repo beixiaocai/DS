@@ -12,7 +12,7 @@
 #include <QComboBox>
 #include <QStyledItemDelegate>
 #include <QFileDialog>
-#include <QDebug>
+#include <QsLog.h>
 
 TaskImport::TaskImport(QWidget *parent) : QDialog(parent)
 {

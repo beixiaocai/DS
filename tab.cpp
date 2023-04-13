@@ -23,6 +23,8 @@ Tab::Tab(QWidget *parent) : QTabWidget(parent)
 
     setStyleSheet(style);
     QTabBar *tabBar = this->tabBar();
+    tabBar->setFocusPolicy(Qt::NoFocus);//去除虚线框
+
     tabBar->setTabsClosable(true);
     tabBar->setSelectionBehaviorOnRemove(QTabBar::SelectPreviousTab);
     tabBar->setMovable(true);

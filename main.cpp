@@ -25,20 +25,48 @@ bool mkDirs(QString dirPath)
     }
 }
 
-void initLogger(QString &logDir){
+void initLogger(const QString &logDir){
 
     if(mkDirs(logDir)){
         Logger& logger = Logger::instance();
         logger.setLoggingLevel(QsLogging::TraceLevel);
-        QString logPath = QString("%1/%2.txt").arg(logDir,QDate::currentDate().toString("yyyy-MM-dd"));
-        DestinationPtr des(DestinationFactory::MakeFileDestination(
-                                           logPath, EnableLogRotation,MaxSizeBytes(10*1024*1024),MaxOldLogCount(5)));
+        //    QString timeStr = QDate::currentDate().toString("yyyy-MM-dd");
+        //    QDateTime time = QDateTime::fromString(timeStr,"yyyy-MM-dd");
+
+        QString logFile = QString("%1/run.log").arg(logDir);
+        DestinationPtr des(
+                    DestinationFactory::MakeFileDestination(logFile,
+                               EnableLogRotation,
+                               MaxSizeBytes(1*1024*1024),
+                               MaxOldLogCount(1)));
         logger.addDestination(des);
-        qDebug()<<"initLogger() success logDir="<<logDir;
+        QLOG_INFO()<<"initLogger() success logDir="<<logDir;
     }else{
-        qDebug()<<"initLogger() error logDir="<<logDir;
+        QLOG_INFO()<<"initLogger() error logDir="<<logDir;
     }
 
+}
+void cleanLogDir(const QString &logDir){
+
+    QDir dir(logDir);
+    if(!dir.exists()){
+        return ;
+    }
+    dir.setFilter(QDir::Files | QDir::Hidden | QDir::NoSymLinks);
+    dir.setSorting(QDir::Size | QDir::Reversed);
+    QFileInfoList list = dir.entryInfoList();
+    for (int i = 0; i < list.size(); ++i){
+        QFileInfo fileInfo = list.at(i);
+        QString filename =fileInfo.fileName();
+        if(filename.size() > 10){
+            QDateTime time = QDateTime::fromString(filename.mid(0,10),"yyyy-MM-dd");
+            if(time.toSecsSinceEpoch() > 0){
+                //此前遗留的日志文件，删除
+                fileInfo.dir().remove(fileInfo.absoluteFilePath());
+            }
+        }
+
+    }
 }
 
 LONG ApplicationCrashHandler(EXCEPTION_POINTERS *pException){
@@ -60,7 +88,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationName("any12345");
     QCoreApplication::setOrganizationDomain("www.any12345.com");
     QCoreApplication::setApplicationName("DS");
-    QCoreApplication::setApplicationVersion("1.5");
+    QCoreApplication::setApplicationVersion("1.6");
 
     SetUnhandledExceptionFilter((LPTOP_LEVEL_EXCEPTION_FILTER)ApplicationCrashHandler);//注冊异常捕获函数
 
@@ -90,9 +118,12 @@ int main(int argc, char *argv[])
     // 获取程序当前地址，需要在QApplication初始化之后获取，否则获取的地址错误
 //    QString logDir = QDir::homePath()+"/AppData/Local/DS/logs";
     QString logDir = QApplication::applicationDirPath() + "/logs";
+//    cleanLogDir(logDir);
     initLogger(logDir);
 
     QLOG_INFO()<< "DS V"+QCoreApplication::applicationVersion()+"  Start";
+
+
     MainWindow mainWindow;
     mainWindow.show();
 

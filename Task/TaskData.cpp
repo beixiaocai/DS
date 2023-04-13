@@ -180,8 +180,9 @@ void TaskData::initTableUi(){
                                                                    menu->threadIntervalSpin->value(),
                                                                    menu->field,
                                                                    menu->fieldIndex,
+                                                                   menu->fieldPrefixLine->text().trimmed(),
                                                                    menu->saveDir,
-                                                                   menu->saveSuffixLine->text());
+                                                                   menu->saveSuffixLine->text().trimmed());
                     //每一个字段的下载器显示两行日志
                     QString log1 = QString("下载任务 '%1'，线程数 %2，线程休眠间隔 %3，下载路径 %4").
                             arg(menu->field).

@@ -114,6 +114,7 @@ void Task::initAddView(){
     addressLabel->setText("网址");
 
     QTextEdit *addressText = new QTextEdit(addView);
+    addressText->setAcceptRichText(false);
     addressText->setMaximumHeight(400);
     addressText->setPlaceholderText("例如：http://www.any12345.com");
     addressText->setStyleSheet(m_stylesheet_QTextEdit);

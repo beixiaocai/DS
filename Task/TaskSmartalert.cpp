@@ -16,7 +16,7 @@
 #include <QToolButton>
 #include <QLineEdit>
 #include <QTimer>
-
+#include <QsLog.h>
 
 TaskSmartalert::MEachP2::MEachP2(const QString eachp2){
     QStringList p2Attrs = eachp2.split(SEPARATOR_WEBDATA_ATTR);
@@ -82,7 +82,7 @@ void TaskSmartalert::smartAlertSelectAll(MCustomTaskSmartAlertSelectAll *selectA
 
     m_webView->page()->runJavaScript(QString("smartAlertSelectAll('%1')").arg(m_i.clickNodeCode), [this,selectAll](const QVariant &v) {
         QString feedback = v.toString();
-        qDebug()<<"选中全部返回：p2";
+        QLOG_INFO()<<"选中全部返回：p2";
 
         stackedWidget->setCurrentWidget(selectAll);
         stackedWidget->show();
@@ -103,7 +103,7 @@ void TaskSmartalert::smartAlertSelectAll(MCustomTaskSmartAlertSelectAll *selectA
     });
 }
 void TaskSmartalert::smartAlertClickEle(){
-   qDebug()<<"TaskSmartalert::smartAlertClickEle()";
+   QLOG_INFO()<<"TaskSmartalert::smartAlertClickEle()";
 
     m_webView->page()->runJavaScript(QString("smartAlertClickEle('%1','%2')").arg(m_i.clickNodeCode,m_i.i_p2.ele_fullXpath),[this](const QVariant &v) {
         QTimer::singleShot(1000,this,[this](){
@@ -117,7 +117,7 @@ void TaskSmartalert::smartAlertClickEle(){
     });
 }
 void TaskSmartalert::smartAlertClickEleTurnPage(){
-    qDebug()<<"TaskSmartalert::smartAlertClickEleTurnPage()";
+    QLOG_INFO()<<"TaskSmartalert::smartAlertClickEleTurnPage()";
 
     m_webView->page()->runJavaScript(QString("smartAlertClickEle('%1','%2')").arg(m_i.clickNodeCode,m_i.i_p2.ele_fullXpath),[this](const QVariant &v) {
 
@@ -138,7 +138,7 @@ void TaskSmartalert::smartAlertClickEleTurnPage(){
 
 }
 void TaskSmartalert::smartAlertInput(const QString &text){
-    qDebug()<<"TaskSmartalert::smartAlertInput"<<text;
+    QLOG_INFO()<<"TaskSmartalert::smartAlertInput"<<text;
 
     m_webView->page()->runJavaScript(QString("smartAlertInput('%1','%2')").arg(m_i.clickNodeCode,text), [this,text](const QVariant &v) {
         Q_UNUSED(v);
@@ -153,7 +153,7 @@ void TaskSmartalert::smartAlertInput(const QString &text){
 }
 
 void TaskSmartalert::smartAlertSelectAllClickEle(){
-    qDebug()<<"TaskSmartalert::smartAlertSelectAllClickEle()";
+    QLOG_INFO()<<"TaskSmartalert::smartAlertSelectAllClickEle()";
 
     m_webView->page()->runJavaScript(QString("smartAlertClickEle('%1','%2')").arg(m_i.clickNodeCode,m_i.i_p2.ele_fullXpath), [this](const QVariant &v) {
         Q_UNUSED(v);
@@ -178,7 +178,7 @@ void TaskSmartalert::smartAlertSelectAllClickEle(){
 }
 void TaskSmartalert::smartAlertMouse(){
 
-    qDebug()<<"TaskSmartalert::smartAlertMouse";
+    QLOG_INFO()<<"TaskSmartalert::smartAlertMouse";
 
     m_webView->page()->runJavaScript(QString("smartAlertMouse('%1')").arg(m_i.clickNodeCode), [this](const QVariant &v) {
         QTimer::singleShot(1000,this,[this](){
@@ -550,7 +550,7 @@ void TaskSmartalert::initCommonWidgetSelectAll(){
 }
 
 void TaskSmartalert::onNotificationFromFlowControl(MFlowStepData *data){
-    qDebug()<<"TaskSmartalert::onNotificationFromFlowControl stepURL = "<<data->stepparams->stepURL;
+    QLOG_INFO()<<"TaskSmartalert::onNotificationFromFlowControl stepURL = "<<data->stepparams->stepURL;
 
     if(data->control->menuType==MCONSTANT_FLOW_MENU_TYPE_OpenWebBtn){
         MFlowStepParamsOpenWeb *stepparams =static_cast<MFlowStepParamsOpenWeb *>(data->stepparams);
@@ -581,7 +581,7 @@ void TaskSmartalert::onNotificationFromFlowControl(MFlowStepData *data){
 }
 
 void TaskSmartalert::onClickSignalToQt(const QString &eachp2,const QString &nodeName,const QString &nodeCode,const QString &loopXpath){
-    qDebug()<<"onClickSignalToQt nodeName="<<nodeName<<"，nodeCode="<<nodeCode<<"，loopXpath="<<loopXpath<<",eachp2="<<eachp2;
+    QLOG_INFO()<<"onClickSignalToQt nodeName="<<nodeName<<"，nodeCode="<<nodeCode<<"，loopXpath="<<loopXpath<<",eachp2="<<eachp2;
 
     emit this->notifySmartAlertChecked(true);
 

@@ -13,8 +13,11 @@
 #include <QJsonObject>
 #include <QJsonParseError>
 #include <QTimer>
+#include <QApplication>
 #include <QsLog.h>
-
+#include <QFile>
+#include <QQueue>
+#include <QDebug>
 
 Api::Api(QObject *parent) : QObject(parent)
 {
@@ -99,6 +102,45 @@ void Api::reportCrash(QString &crashMsg){
      **/
 
     QHash<QString,QString> params;
+    QString logFile = QString("%1/logs/run.log").arg(QApplication::applicationDirPath());
+
+    QFile logF(logFile);
+    QString logText;
+
+    if(logF.exists()){
+        if(logF.open(QIODevice::ReadOnly| QIODevice::Text)){
+            qDebug()<<"logF.size()="<<logF.size();
+            QString line;
+            int lineCount = 0;
+            QQueue<QString> lineQ;
+
+            while (true) {
+                ++lineCount;
+                line = logF.readLine();
+                if(line.isEmpty()){
+                    break;
+                }
+                if(lineCount < 10){
+                    logText += line;
+                }else{
+                    lineQ.enqueue(line);
+                    if(lineQ.size() > 100){
+                        lineQ.takeFirst();
+    //                    lineQ.pop_front();
+                    }
+                }
+            }
+            logText += QString("lineCount=%1\n").arg(lineCount);
+            while (!lineQ.isEmpty()) {
+                line = lineQ.takeFirst();
+                logText += line;
+            }
+            logF.close();
+        }
+        logText = logText.toUtf8().toBase64();
+    }
+    //qDebug()<<"logFile="<<logFile;
+    //qDebug()<<"logText="<<logText;
 
     params.insert("finger",Database::getInstance()->getFinger());
     params.insert("bootUniqueId",QSysInfo::bootUniqueId());
@@ -113,6 +155,8 @@ void Api::reportCrash(QString &crashMsg){
     params.insert("productType",QSysInfo::productType());
     params.insert("productVersion",QSysInfo::productVersion());
     params.insert("crashMsg",crashMsg);
+    params.insert("logFile",logFile);
+    params.insert("logText",logText);
 
     QString url = HOST+"/reportCrash?version="+QCoreApplication::applicationVersion();
     QHash<QString,QString>::const_iterator it;
@@ -150,7 +194,6 @@ void Api::reportCrash(QString &crashMsg){
     }
 
     QLOG_INFO() <<"Api::reportCrash state="<<state<<",msg="<<msg;
-
 }
 
 

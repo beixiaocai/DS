@@ -18,6 +18,7 @@ public:
     QString field;
     int fieldIndex;
     QPushButton *downloadBtn;
+    QLineEdit *fieldPrefixLine;
     QLineEdit *saveSuffixLine;//文件后缀
     QSpinBox *threadCountSpin;
     QSpinBox *threadIntervalSpin;//线程间隔时长

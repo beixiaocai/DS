@@ -92,7 +92,7 @@ void Settings::initSettingsUi(){
     connect(checkBtn,&QPushButton::clicked,this,[this,loadingLabel,noupdateLabel](){
         loadingLabel->show();
         noupdateLabel->setText("");
-        ApiCheckVersion::getInstance()->checkVersion();
+        ApiCheckVersion::getInstance()->asyncCheckVersion();
     });
 
     versionHLayout->addWidget(checkBtn);

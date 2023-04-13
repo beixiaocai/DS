@@ -11,7 +11,7 @@ class TaskDataDownloadManager : public QObject
 {
     Q_OBJECT
 public:
-    explicit TaskDataDownloadManager(QObject *parent,const QString &taskName,const QString &taskCode,const QStringList &fields,int threadCount,int threadInterval,const QString &field,int fieldIndex,const QString &saveDir,const QString &saveSuffix);
+    explicit TaskDataDownloadManager(QObject *parent,const QString &taskName,const QString &taskCode,const QStringList &fields,int threadCount,int threadInterval,const QString &field,int fieldIndex,const QString &fieldPrefix,const QString &saveDir,const QString &saveSuffix);
     ~TaskDataDownloadManager();
 
 private:
@@ -22,6 +22,7 @@ private:
     int mThreadInterval;
     QString mField;
     int mFieldIndex;
+    QString mFieldPrefix;
     QString mSaveDir;
     QString mSaveSuffix;
 private:

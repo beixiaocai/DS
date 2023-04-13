@@ -1,5 +1,6 @@
 HEADERS += \
     $$PWD/Api.h \
+    $$PWD/Utils.h \
     $$PWD/ApiCheckVersion.h \
     $$PWD/ComLineWidget.h \
     $$PWD/ComLoadingLabel.h \

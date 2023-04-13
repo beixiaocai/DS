@@ -54,7 +54,7 @@ void TaskWebView::injectJavascript(bool inject){
 }
 
 QWebEngineView *TaskWebView::createWindow(QWebEnginePage::WebWindowType type){
-    qDebug()<<"TaskWebView::createWindow"<<type<<page()<<this->url().url();
+    QLOG_INFO()<<"TaskWebView::createWindow"<<type<<page()<<this->url().url();
 
     if(type == QWebEnginePage::WebBrowserTab){
         TaskWebView::setPage(createWebPage());

@@ -16,6 +16,7 @@
 #include <QDesktopServices>
 #include <QUrl>
 #include <QTimer>
+#include <QsLog.h>
 
 Index::Index(QWidget *parent) : QWidget(parent)
 {
@@ -42,7 +43,8 @@ Index::Index(QWidget *parent) : QWidget(parent)
         }
     });
     QTimer::singleShot(2000,this,[](){
-        ApiCheckVersion::getInstance()->checkVersion();
+        ApiCheckVersion::getInstance()->asyncCheckVersion();
+
     });
 }
 Index::~Index(){

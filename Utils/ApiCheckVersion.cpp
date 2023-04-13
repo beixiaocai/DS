@@ -80,16 +80,7 @@ void ApiCheckVersion::onRequestFinished(QNetworkReply *reply){
 
 }
 
-void ApiCheckVersion::checkVersion(){
-
-//    bool state = false;
-//    QString msg = "当前是最新版本";
-//    MVersion version;
-//    version.version = QString("1.0").toFloat();
-//    version.pubdate = "2023.3.16";
-//    version.updateContent = "更新了，谢谢";
-//    version.url = "https://gitee.com/Vanishi";
-//    emit this->notifyGetVersion(state,msg,version);
+void ApiCheckVersion::asyncCheckVersion(){
 
     QHash<QString,QString> params;
     params.insert("finger",Database::getInstance()->getFinger());
@@ -111,7 +102,7 @@ void ApiCheckVersion::checkVersion(){
     for (it=params.constBegin();it!=params.constEnd();++it) {
         url +="&"+it.key()+"="+it.value();
     }
-//    QLOG_INFO() <<"ApiCheckVersion::checkVersionh url="<<url;
+    QLOG_INFO() <<"ApiCheckVersion::asyncCheckVersion url="<<url;
 
     QUrl qurl(url);
     QNetworkRequest request(qurl);

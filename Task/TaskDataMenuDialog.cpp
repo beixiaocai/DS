@@ -21,16 +21,16 @@ TaskDataMenuDialog::TaskDataMenuDialog(QWidget *parent,const QString &field,int 
     setWindowTitle("高级选项");
     setStyleSheet(".TaskDataMenuDialog{background-color:rgb(246,247,251);}");
 
-    setFixedSize(340,340);
+    setFixedSize(340,380);
 
     QVBoxLayout *boxLayout = new QVBoxLayout(this);
     boxLayout->setContentsMargins(0,0,0,0);
 
     ComOptionsBox *optionsBox = new ComOptionsBox(this,"下载选项");
-    // 1
+    // 字段名称
     QLabel *nameLabel = new QLabel(optionsBox->gWidget);
     nameLabel->setStyleSheet(m_stylesheet_QLabel14);
-    nameLabel->setText("下载字段名称");
+    nameLabel->setText("字段名称*");
 
     QLabel *nameVLabel = new QLabel(optionsBox->gWidget);
     nameVLabel->setStyleSheet(m_stylesheet_QLabel14);
@@ -40,14 +40,29 @@ TaskDataMenuDialog::TaskDataMenuDialog(QWidget *parent,const QString &field,int 
     optionsBox->gLayout->addWidget(nameVLabel,optionsBox->rowStart,1);
     ++optionsBox->rowStart;
 
-    // 2
+    //下载前缀
+    QLabel *fieldPrefixLabel = new QLabel(optionsBox->gWidget);
+    fieldPrefixLabel->setStyleSheet(m_stylesheet_QLabel14);
+    fieldPrefixLabel->setText("下载前缀");
 
+    fieldPrefixLine = new QLineEdit(optionsBox->gWidget);
+    fieldPrefixLine->setFixedSize(120,30);
+    fieldPrefixLine->setPlaceholderText("请输入下载前缀");
+    fieldPrefixLine->setStyleSheet(m_stylesheet_QLineEdit);
+    fieldPrefixLine->setClearButtonEnabled(true);
+    fieldPrefixLine->setFocusPolicy(Qt::FocusPolicy::ClickFocus);
+
+    optionsBox->gLayout->addWidget(fieldPrefixLabel,optionsBox->rowStart,0);
+    optionsBox->gLayout->addWidget(fieldPrefixLine,optionsBox->rowStart,1);
+    ++optionsBox->rowStart;
+
+    // 下载后文件后缀
     QLabel *saveSuffixLabel = new QLabel(optionsBox->gWidget);
     saveSuffixLabel->setStyleSheet(m_stylesheet_QLabel14);
-    saveSuffixLabel->setText("下载后文件后缀");
+    saveSuffixLabel->setText("下载后文件后缀*");
 
     saveSuffixLine = new QLineEdit(optionsBox->gWidget);
-    saveSuffixLine->setFixedSize(100,30);
+    saveSuffixLine->setFixedSize(120,30);
     saveSuffixLine->setText(".jpg");
     saveSuffixLine->setStyleSheet(m_stylesheet_QLineEdit);
     saveSuffixLine->setClearButtonEnabled(true);
@@ -58,16 +73,16 @@ TaskDataMenuDialog::TaskDataMenuDialog(QWidget *parent,const QString &field,int 
     ++optionsBox->rowStart;
 
 
-    // 3
+    // 下载线程
     QLabel *threadCountLabel = new QLabel(optionsBox->gWidget);
     threadCountLabel->setStyleSheet(m_stylesheet_QLabel14);
-    threadCountLabel->setText("下载线程");
+    threadCountLabel->setText("下载线程*");
 
     threadCountSpin = new QSpinBox(optionsBox->gWidget);
     threadCountSpin->setMinimum(1);
     threadCountSpin->setMaximum(1);
 //    threadCountSpin->setSuffix("并发");
-    threadCountSpin->setMaximumWidth(100);
+    threadCountSpin->setMaximumWidth(80);
     threadCountSpin->setStyleSheet(m_stylesheet_QSpinBox);
     threadCountSpin->setValue(1);
 
@@ -75,16 +90,16 @@ TaskDataMenuDialog::TaskDataMenuDialog(QWidget *parent,const QString &field,int 
     optionsBox->gLayout->addWidget(threadCountSpin,optionsBox->rowStart,1);
     ++optionsBox->rowStart;
 
-    // 4
+    // 线程休眠间隔
     QLabel *threadIntervalLabel = new QLabel(optionsBox->gWidget);
     threadIntervalLabel->setStyleSheet(m_stylesheet_QLabel14);
-    threadIntervalLabel->setText("线程休眠间隔");
+    threadIntervalLabel->setText("线程休眠间隔*");
 
     threadIntervalSpin = new QSpinBox(optionsBox->gWidget);
     threadIntervalSpin->setMinimum(1);
     threadIntervalSpin->setMaximum(30);
     threadIntervalSpin->setSuffix("秒");
-    threadIntervalSpin->setMaximumWidth(100);
+    threadIntervalSpin->setMaximumWidth(80);
     threadIntervalSpin->setStyleSheet(m_stylesheet_QSpinBox);
     threadIntervalSpin->setValue(1);
 
@@ -93,17 +108,17 @@ TaskDataMenuDialog::TaskDataMenuDialog(QWidget *parent,const QString &field,int 
     ++optionsBox->rowStart;
 
 
-    // 5
+    // 请选择下载路径
     QLabel *dirLabel = new QLabel(optionsBox->gWidget);
     dirLabel->setStyleSheet(m_stylesheet_QLabel14);
-    dirLabel->setText("请选择下载路径");
+    dirLabel->setText("请选择下载路径*");
 
     QPushButton *dirBtn= new QPushButton(optionsBox->gWidget);
-    dirBtn->setStyleSheet( ".QPushButton {color:rgb(64,65,66);font-family:Microsoft YaHei;font-size:13px;background-color:white; border:1px solid rgb(64,65,66); border-radius: 0px;padding: 0px;}\
+    dirBtn->setStyleSheet( ".QPushButton {color:rgb(64,65,66);font-family:Microsoft YaHei;font-size:13px;background-color:white; border:1px solid rgb(64,65,66); padding: 0px;}\
                            .QPushButton:pressed {background-color: rgba(240,240,240,0.8);}\
                            .QPushButton:hover {background-color: rgba(240,240,240,0.4); border-color:rgba(64,65,66,0.5);}\
                            .QPushButton:focus{outline: none;}");
-    dirBtn->setFixedSize(140,22);
+    dirBtn->setFixedSize(140,26);
     dirBtn->setText("选择");
     connect(dirBtn,&QPushButton::clicked,this,[this,dirBtn](){
         QString dir = QFileDialog::getExistingDirectory(this,"选择文件夹","");

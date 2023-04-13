@@ -24,6 +24,7 @@
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QTimer>
+#include <QsLog.h>
 
 TaskManage::TaskManage(QWidget *parent) :QWidget(parent)
 {
@@ -240,7 +241,7 @@ void TaskManage::initTableUi(){
 
     });
 //    connect(tableWidget,&QTableWidget::clicked,this,[](const QModelIndex &index){
-//        qDebug()<<"QTableWidget::clicked"<<index;;
+//        QLOG_INFO()<<"QTableWidget::clicked"<<index;;
 //    });
 
     boxLayout->addWidget(tableWidget);

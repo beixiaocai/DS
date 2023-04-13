@@ -1,7 +1,8 @@
 ﻿# DS
 
 * 作者：北小菜 
-* 邮箱：bilibili_bxc@126
+* QQ群：529336606
+* 邮箱：bilibili_bxc@126.com
 * 作者主页：http://www.any12345.com/user/4
 * 作者哔哩哔哩主页：https://space.bilibili.com/487906612
 * 软件哔哩哔哩讲解视频：https://www.bilibili.com/video/BV1uM4y167bg/

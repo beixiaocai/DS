@@ -6,10 +6,10 @@
 TaskDataDownloadManager::TaskDataDownloadManager(QObject *parent,
                                                  const QString &taskName,const QString &taskCode,const QStringList &fields,
                                                  int threadCount,int threadInterval,
-                                                 const QString &field,int fieldIndex,const QString &saveDir,const QString &saveSuffix) :
+                                                 const QString &field,int fieldIndex,const QString &fieldPrefix,const QString &saveDir,const QString &saveSuffix) :
     QObject(parent),mTaskName(taskName),mTaskCode(taskCode),mFields(fields),
     mThreadCount(threadCount),mThreadInterval(threadInterval),
-    mField(field),mFieldIndex(fieldIndex),mSaveDir(saveDir),mSaveSuffix(saveSuffix){
+    mField(field),mFieldIndex(fieldIndex),mFieldPrefix(fieldPrefix),mSaveDir(saveDir),mSaveSuffix(saveSuffix){
 
     QLOG_INFO()<<"TaskDataDownloadManager::TaskDataDownloadManager()";
 
@@ -86,7 +86,7 @@ void TaskDataDownloadManager::readSeedFromDatabase(){
                     fieldId = data[row][column].toInt();//数据表的ID
                 }
                 if(mFieldIndex == column){
-                     url =data[row][column]; //数据表该字段的值
+                     url =mFieldPrefix + data[row][column]; //数据表该字段的值
                 }
             }
             //构造下载任务

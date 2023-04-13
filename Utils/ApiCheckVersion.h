@@ -1,4 +1,4 @@
-#ifndef APICHECKVERSION_H
+﻿#ifndef APICHECKVERSION_H
 #define APICHECKVERSION_H
 
 #include <QObject>
@@ -23,7 +23,7 @@ private:
     static QAtomicPointer<ApiCheckVersion> mInstance;
     static QMutex mInstanceMtx;
 public:
-    void checkVersion();// 检查版本
+    void asyncCheckVersion();// 检查版本
 signals:
     void notifyCheckVersion(bool state,QString &msg,MVersion &version);
 private slots:
