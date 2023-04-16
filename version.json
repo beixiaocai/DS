@@ -44,7 +44,7 @@
   {
       "version":"1.7",
       "pubdate":"2023.4.16",
-      "updateContent":"发布更新了\n1，内置浏览器支持系统VPN。\n2，内置浏览器支持数据缓存。\n3，优化部分系统崩溃问题。\n4，优化数据导出功能。",
-      "url":"https://gitee.com/Vanishi/DS/releases/tag/DS.v1.6.x64.2023.04.13"
+      "updateContent":"发布更新了\n1，内置浏览器支持系统VPN。\n2，内置浏览器支持数据缓存。\n3，优化部分系统崩溃问题。\n4，优化数据导出功能。\n5，网盘下载 http://www.any12345.com/thread/39。",
+      "url":"https://github.com/any12345com/DS/releases/tag/DS.v1.7.x64.2023.04.16"
    }
 ]
