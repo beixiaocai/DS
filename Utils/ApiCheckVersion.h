@@ -23,7 +23,7 @@ private:
     static QAtomicPointer<ApiCheckVersion> mInstance;
     static QMutex mInstanceMtx;
 public:
-    void asyncCheckVersion();// 检查版本
+    void checkVersion();// 检查版本
 signals:
     void notifyCheckVersion(bool state,QString &msg,MVersion &version);
 private slots:

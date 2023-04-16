@@ -3,8 +3,6 @@
 #include <QLabel>
 #include <QListWidget>
 #include <QListWidgetItem>
-#include <QDebug>
-
 
 
 MCustomTaskSmartAlertSuccess::MCustomTaskSmartAlertSuccess(QWidget *parent) : QWidget(parent)

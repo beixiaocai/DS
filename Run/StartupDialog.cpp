@@ -84,31 +84,36 @@ void StartupDialog::initRightTimedStartUi(){
     ComOptionsBox *optionsBox = new ComOptionsBox(rightTimedStartWidget,"高级选项");
 
 
-    //是否循环采集 start
-    rightLoopCb = new QCheckBox(optionsBox->gWidget);
-    rightLoopCb->setStyleSheet(m_stylesheet_QCheckBox);
-    rightLoopCb->setText("循环采集");
-    rightLoopCb->setChecked(true);
+    //开启无痕浏览器 start
+    QLabel *tracelessBrowserLabel = new QLabel(optionsBox->gWidget);
+    tracelessBrowserLabel->setStyleSheet(m_stylesheet_QLabel);
+    tracelessBrowserLabel->setText("无痕浏览器");
 
-    optionsBox->gLayout->addWidget(rightLoopCb,optionsBox->rowStart,0);
+    rightTimedTracelessBrowserCb = new QCheckBox(optionsBox->gWidget);
+    rightTimedTracelessBrowserCb->setStyleSheet(m_stylesheet_QCheckBox);
+    rightTimedTracelessBrowserCb->setChecked(false);
+
+    optionsBox->gLayout->addWidget(tracelessBrowserLabel,optionsBox->rowStart,0);
+    optionsBox->gLayout->addWidget(rightTimedTracelessBrowserCb,optionsBox->rowStart,1);
+
     ++optionsBox->rowStart;
-    //是否循环采集 send
+    //开启无痕浏览器 end
 
 
     //循环间隔时间 start
     QLabel *intervalLabel = new QLabel(optionsBox->gWidget);
     intervalLabel->setStyleSheet(m_stylesheet_QLabel);
     intervalLabel->setText("循环间隔时间");
-    rightLoopIntervalSpin = new QSpinBox(optionsBox->gWidget);
-    rightLoopIntervalSpin->setMinimum(1);
-    rightLoopIntervalSpin->setMaximum(1440);
-    rightLoopIntervalSpin->setSuffix("分钟");
-    rightLoopIntervalSpin->setMaximumWidth(160);
-    rightLoopIntervalSpin->setStyleSheet(m_stylesheet_QSpinBox);
-    rightLoopIntervalSpin->setValue(10);
+    rightTimedLoopIntervalSpin = new QSpinBox(optionsBox->gWidget);
+    rightTimedLoopIntervalSpin->setMinimum(1);
+    rightTimedLoopIntervalSpin->setMaximum(1440);
+    rightTimedLoopIntervalSpin->setSuffix("分钟");
+    rightTimedLoopIntervalSpin->setMaximumWidth(160);
+    rightTimedLoopIntervalSpin->setStyleSheet(m_stylesheet_QSpinBox);
+    rightTimedLoopIntervalSpin->setValue(10);
 
     optionsBox->gLayout->addWidget(intervalLabel,optionsBox->rowStart,0);
-    optionsBox->gLayout->addWidget(rightLoopIntervalSpin,optionsBox->rowStart,1);
+    optionsBox->gLayout->addWidget(rightTimedLoopIntervalSpin,optionsBox->rowStart,1);
     ++optionsBox->rowStart;
 
     //循环间隔时间 end
@@ -120,20 +125,20 @@ void StartupDialog::initRightTimedStartUi(){
     singleLabel->setStyleSheet(m_stylesheet_QLabel);
     singleLabel->setText("循环单次时长");
 
-    rightLoopSingleSpin = new QSpinBox(optionsBox->gWidget);
-    rightLoopSingleSpin->setMinimum(0);
-    rightLoopSingleSpin->setMaximum(0);
-    rightLoopSingleSpin->setSuffix("分钟");
-    rightLoopSingleSpin->setMaximumWidth(160);
-    rightLoopSingleSpin->setStyleSheet(m_stylesheet_QSpinBox);
-    rightLoopSingleSpin->setValue(0);
+    rightTimedLoopSingleSpin = new QSpinBox(optionsBox->gWidget);
+    rightTimedLoopSingleSpin->setMinimum(0);
+    rightTimedLoopSingleSpin->setMaximum(0);
+    rightTimedLoopSingleSpin->setSuffix("分钟");
+    rightTimedLoopSingleSpin->setMaximumWidth(160);
+    rightTimedLoopSingleSpin->setStyleSheet(m_stylesheet_QSpinBox);
+    rightTimedLoopSingleSpin->setValue(0);
 
     QLabel *singleRemarkLabel = new QLabel(optionsBox->gWidget);
     singleRemarkLabel->setStyleSheet(m_stylesheet_QLabel);
     singleRemarkLabel->setText("0表示不限制单次时长");
 
     optionsBox->gLayout->addWidget(singleLabel,optionsBox->rowStart,0);
-    optionsBox->gLayout->addWidget(rightLoopSingleSpin,optionsBox->rowStart,1);
+    optionsBox->gLayout->addWidget(rightTimedLoopSingleSpin,optionsBox->rowStart,1);
     optionsBox->gLayout->addWidget(singleRemarkLabel,optionsBox->rowStart,2);
     ++optionsBox->rowStart;
     //循环间隔时间 end
@@ -156,14 +161,16 @@ void StartupDialog::initRightTimedStartUi(){
     submitHLayout->addStretch(10);
 
     connect(submitBtn,&QPushButton::clicked,this,[this](){
-        bool isLoop = false;
-        if(rightLoopCb->checkState()==Qt::CheckState::Checked){
-            isLoop = true;
+        bool isTraceless = false;
+        if(rightTimedTracelessBrowserCb->checkState()==Qt::CheckState::Checked){
+            isTraceless = true;
         }
+
         MTaskRunParams runParams;
-        runParams.isLoop = isLoop;
-        runParams.loopInterval = rightLoopIntervalSpin->value();//循环间隔时长
-        runParams.loopSingle = rightLoopSingleSpin->value();//循环单次间隔时长
+        runParams.isTraceless = isTraceless;
+        runParams.isLoop = true;
+        runParams.loopInterval = rightTimedLoopIntervalSpin->value();//循环间隔时长
+        runParams.loopSingle = rightTimedLoopSingleSpin->value();//循环单次间隔时长
         mTask->runParams = runParams;
 
         RunDialog *runDialog = new RunDialog(mTask);// 交给RunDialog界面释放task
@@ -205,6 +212,21 @@ void StartupDialog::initRightDirectStartUi(){
     introHLayout->addWidget(summaryLabel);
     introHLayout->addStretch(10);
 
+    ComOptionsBox *optionsBox = new ComOptionsBox(rightDirectStartWidget,"高级选项");
+
+    //开启无痕浏览器 start
+    QLabel *tracelessBrowserLabel = new QLabel(optionsBox->gWidget);
+    tracelessBrowserLabel->setStyleSheet(m_stylesheet_QLabel);
+    tracelessBrowserLabel->setText("无痕浏览器");
+
+    rightDirectTracelessBrowserCb = new QCheckBox(optionsBox->gWidget);
+    rightDirectTracelessBrowserCb->setStyleSheet(m_stylesheet_QCheckBox);
+    rightDirectTracelessBrowserCb->setChecked(false);
+
+    optionsBox->gLayout->addWidget(tracelessBrowserLabel,optionsBox->rowStart,0);
+    optionsBox->gLayout->addWidget(rightDirectTracelessBrowserCb,optionsBox->rowStart,1);
+    ++optionsBox->rowStart;
+    //开启无痕浏览器 end
 
     // 任务提交行
     QWidget * submitWidget = new QWidget(rightDirectStartWidget);
@@ -223,7 +245,12 @@ void StartupDialog::initRightDirectStartUi(){
     submitHLayout->addStretch(10);
 
     connect(submitBtn,&QPushButton::clicked,this,[this](){
+        bool isTraceless = false;
+        if(rightDirectTracelessBrowserCb->checkState()==Qt::CheckState::Checked){
+            isTraceless = true;
+        }
         MTaskRunParams runParams;
+        runParams.isTraceless = isTraceless;
         runParams.isLoop = false;
         mTask->runParams = runParams;
 
@@ -237,6 +264,8 @@ void StartupDialog::initRightDirectStartUi(){
 
     vLayout->addSpacing(30);
     vLayout->addWidget(introWidget);
+    vLayout->addSpacing(10);
+    vLayout->addWidget(optionsBox);
     vLayout->addStretch(10);
     vLayout->addWidget(submitWidget);
     vLayout->addSpacing(30);

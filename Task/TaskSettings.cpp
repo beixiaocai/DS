@@ -15,7 +15,6 @@
 #include <QScrollArea>
 #include <QScrollBar>
 
-
 TaskSettings::TaskSettings(QWidget *parent,MTask *task) : QWidget(parent),
     m_task(task)
 {

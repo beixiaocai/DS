@@ -1,11 +1,8 @@
 ﻿#include "Index.h"
-#include "Utils/ComLineWidget.h"
-#include "Utils/models.h"
-#include "Utils/ApiCheckVersion.h"
+#include "ComLineWidget.h"
 #include "ReportThread.h"
 #include "style.h"
-#include "Version.h"
-#include "Utils/constant.h"
+#include "constant.h"
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QPushButton>
@@ -32,20 +29,6 @@ Index::Index(QWidget *parent) : QWidget(parent)
         mReportThread->start();
 
     }
-
-    connect(ApiCheckVersion::getInstance(),&ApiCheckVersion::notifyCheckVersion,this,[this](bool state,QString &msg,MVersion &version){
-        if(state){
-            float curVersion = QCoreApplication::applicationVersion().toFloat();
-            if(version.version > curVersion){
-                Version dlg(version,this);
-                dlg.exec();
-            }
-        }
-    });
-    QTimer::singleShot(2000,this,[](){
-        ApiCheckVersion::getInstance()->asyncCheckVersion();
-
-    });
 }
 Index::~Index(){
     if(IS_reportHeart){
@@ -107,7 +90,6 @@ void Index::initUI(){
     inputLine->setStyleSheet(m_stylesheet_QLineEdit);
     inputLine->setClearButtonEnabled(true);
     inputLine->setFocusPolicy(Qt::FocusPolicy::ClickFocus);
-
 
     QAction *inputAction = new QAction(inputLine);
     inputAction->setIcon(QIcon(":/res/images/icon/searchblack.png"));

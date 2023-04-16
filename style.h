@@ -24,7 +24,7 @@ const QString m_stylesheet_QTextEdit = ".QTextEdit{color:rgb(64,65,66);font-fami
 const QString m_stylesheet_QSpinBox = ".QSpinBox{color:rgb(64,65,66);font-family:Microsoft YaHei;font-size:13px;border:1px solid rgb(217,217,217);border-radius: 3px; padding: 1px;}\
          .QSpinBox:hover {border:1px solid rgb(64,65,66);}";
 
-const QString m_stylesheet_QComboBox =".QComboBox {color:rgb(64,65,66);font-family:Microsoft YaHei;font-size:12px; border:1px solid rgb(217,217,217);border-radius: 3px; padding: 2px;}\
+const QString m_stylesheet_QComboBox =".QComboBox {color:rgb(64,65,66);font-family:Microsoft YaHei;font-size:13px; border:1px solid rgb(217,217,217);border-radius: 3px; padding: 1px;}\
          .QComboBox:hover {border-color:rgb(64,65,66);}\
          .QComboBox::drop-down{width:5px;} \
          .QComboBox QAbstractItemView{border: 1px solid darkgray;border-radius:2px;outline:0px;} \

@@ -3,17 +3,17 @@ HEADERS += \
     $$PWD/ReportThread.h \
     $$PWD/About.h \
     $$PWD/Index.h \
-    $$PWD/Version.h \
+    $$PWD/VersionDialog.h \
     $$PWD/Settings.h \
-    $$PWD/SettingsProxy.h
+    $$PWD/SettingsProxyDialog.h
 
 SOURCES += \
     $$PWD/ReportThread.cpp \
     $$PWD/About.cpp \
     $$PWD/Index.cpp \
-    $$PWD/Version.cpp \
+    $$PWD/VersionDialog.cpp \
     $$PWD/Settings.cpp \
-    $$PWD/SettingsProxy.cpp
+    $$PWD/SettingsProxyDialog.cpp
 
 
 INCLUDEPATH += home

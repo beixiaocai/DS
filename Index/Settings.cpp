@@ -1,11 +1,12 @@
 ﻿#include "Settings.h"
-#include "SettingsProxy.h"
+#include "SettingsProxyDialog.h"
 #include "Utils/ApiCheckVersion.h"
 #include "Utils/models.h"
 #include "style.h"
-#include "Version.h"
 #include "Utils/ComLoadingLabel.h"
 #include "Utils/ComLineWidget.h"
+#include "Utils/ComMessageBox.h"
+#include "Task/TaskWebEngineProfile.h"
 #include <QSettings>
 #include <QCoreApplication>
 #include <QVBoxLayout>
@@ -15,10 +16,12 @@
 #include <QLabel>
 #include <QCheckBox>
 #include <QTimer>
-
+#include <QMessageBox>
+#include <QsLog.h>
 
 Settings::Settings(QWidget *parent) : QWidget(parent)
 {
+    QLOG_INFO() << "Settings::Settings()";
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(0,2,0,0);
     mainLayout->setSpacing(0);
@@ -32,16 +35,24 @@ Settings::Settings(QWidget *parent) : QWidget(parent)
     boxLayout->setSpacing(0);
 
     boxLayout->addSpacing(30);
-    initSettingsUi();
+    initUi();
     boxLayout->addStretch(10);
 
+    // 检测更新监听
+    connect(ApiCheckVersion::getInstance(),&ApiCheckVersion::notifyCheckVersion,this,[this](bool state,QString &msg,MVersion &version){
+        loadingLabel->hide();
+        loadingMsgLabel->setText(msg);
+    });
+
+}
+Settings::~Settings(){
+  QLOG_INFO() << "Settings::~Settings()";
 }
 
-
-void Settings::initSettingsUi(){
+void Settings::initUi(){
 
     QWidget *outWidget = new QWidget(this);
-    outWidget->setFixedSize(600,110);
+    outWidget->setFixedSize(600,160);
     outWidget->setStyleSheet(".QWidget{background-color:rgb(205,205,205);border-radius: 5px;}");
     QVBoxLayout *outLayout = new QVBoxLayout(outWidget);
     outLayout->setContentsMargins(1,1,1,1);
@@ -52,7 +63,9 @@ void Settings::initSettingsUi(){
     settingsLayout->setContentsMargins(20,0,20,0);
     settingsLayout->setSpacing(0);
 
-    // 版本升级 start
+
+
+    // 版本检测更新 start
     QWidget *versionWidget = new QWidget(settingsWidget);
     versionWidget->setFixedHeight(45);
     QHBoxLayout *versionHLayout = new QHBoxLayout(versionWidget);
@@ -66,33 +79,15 @@ void Settings::initSettingsUi(){
     QLabel *versionLabel = new QLabel(versionWidget);
     versionLabel->setStyleSheet(m_stylesheet_QLabel12);
     versionLabel->setText(QString("当前版本号：%1").arg(QCoreApplication::applicationVersion()));
-    ComLoadingLabel *loadingLabel = new ComLoadingLabel(versionWidget);
-    QLabel *noupdateLabel = new QLabel(versionWidget);
-    noupdateLabel->setStyleSheet(m_stylesheet_QLabel12);
+    loadingLabel = new ComLoadingLabel(versionWidget);
+    loadingMsgLabel = new QLabel(versionWidget);
+    loadingMsgLabel->setStyleSheet(m_stylesheet_QLabel12);
 
 
-    connect(ApiCheckVersion::getInstance(),&ApiCheckVersion::notifyCheckVersion,this,[this,loadingLabel,noupdateLabel](bool state,QString &msg,MVersion &version){
-        loadingLabel->hide();
-        if(state){
-            float curVersion = QCoreApplication::applicationVersion().toFloat();
-            if(version.version > curVersion){
-                Version dlg(version,this);
-                dlg.exec();
-            }else{
-
-                noupdateLabel->setText(msg);
-            }
-        }else{
-            noupdateLabel->setText(msg);
-        }
-
-    });
-
-
-    connect(checkBtn,&QPushButton::clicked,this,[this,loadingLabel,noupdateLabel](){
+    connect(checkBtn,&QPushButton::clicked,this,[this](){
         loadingLabel->show();
-        noupdateLabel->setText("");
-        ApiCheckVersion::getInstance()->asyncCheckVersion();
+        loadingMsgLabel->setText("");
+        ApiCheckVersion::getInstance()->checkVersion();
     });
 
     versionHLayout->addWidget(checkBtn);
@@ -101,11 +96,44 @@ void Settings::initSettingsUi(){
     versionHLayout->addSpacing(10);
     versionHLayout->addWidget(loadingLabel);
     versionHLayout->addSpacing(10);
-    versionHLayout->addWidget(noupdateLabel);
+    versionHLayout->addWidget(loadingMsgLabel);
     versionHLayout->addStretch(10);
-    // 版本升级 end
+    // 版本检测更新 end
+
+    // 清空缓存 start
+    QWidget *clearCacheWidget = new QWidget(settingsWidget);
+    clearCacheWidget->setFixedHeight(45);
+    QHBoxLayout *clearCacheHLayout = new QHBoxLayout(clearCacheWidget);
+    clearCacheHLayout->setContentsMargins(0,0,0,0);
+    clearCacheHLayout->setSpacing(0);
+
+    QPushButton * clearCacheBtn = new QPushButton(clearCacheWidget);
+    clearCacheBtn->setFixedSize(80,28);
+    clearCacheBtn->setStyleSheet(m_stylesheet_QPushButton_hollow);
+    clearCacheBtn->setCursor(Qt::PointingHandCursor);
+    clearCacheBtn->setText("清空缓存");
+
+    QLabel *clearCacheLabel = new QLabel(clearCacheWidget);
+    clearCacheLabel->setStyleSheet(m_stylesheet_QLabel12);
+    clearCacheLabel->setText("清空浏览器缓存，历史记录，登录信息等");
+
+    connect(clearCacheBtn,&QPushButton::clicked,this,[this](){
+//        QMessageBox::information(NULL, "清空缓存", "清空缓存成功",QMessageBox::NoButton);
 
 
+
+        auto answer = QMessageBox::question(this,tr("清空缓存"),tr("清空浏览器缓存，历史记录，登录信息等?"));
+        if (answer == QMessageBox::Yes){
+            TaskWebEngineProfile::getInstance()->clearCache();
+
+            ComMessageBox::success(NULL,"清空缓存成功");
+        }
+    });
+    clearCacheHLayout->addWidget(clearCacheBtn);
+    clearCacheHLayout->addSpacing(10);
+    clearCacheHLayout->addWidget(clearCacheLabel);
+    clearCacheHLayout->addStretch(10);
+    // 清空缓存 end
     // 代理 start
     QWidget *proxyWidget = new QWidget(settingsWidget);
     proxyWidget->setFixedHeight(45);
@@ -124,7 +152,7 @@ void Settings::initSettingsUi(){
     proxyLabel->setText("目前支持手动设置");
 
     connect(proxyBtn,&QPushButton::clicked,this,[this](){
-        SettingsProxy  dlg(this);
+        SettingsProxyDialog  dlg(this);
         dlg.exec();
     });
     proxyHLayout->addWidget(proxyBtn);
@@ -133,10 +161,9 @@ void Settings::initSettingsUi(){
     proxyHLayout->addStretch(10);
     // 代理 end
 
-
-
-
     settingsLayout->addWidget(versionWidget);
+    settingsLayout->addWidget(new ComLineWidget(this));
+    settingsLayout->addWidget(clearCacheWidget);
     settingsLayout->addWidget(new ComLineWidget(this));
     settingsLayout->addWidget(proxyWidget);
 

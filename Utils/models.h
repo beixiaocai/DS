@@ -39,6 +39,7 @@ public:
 };
 struct MTaskRunParams{
 public:
+    bool isTraceless = false;//是否开启无痕浏览器模式
     bool isLoop = false;
     bool loopIsContinue = true;//循环执行时，执行状态，默认true 是一直循环，如果手动停止，则修改为false，循环将被终止
     int  loopPeriod = 1;

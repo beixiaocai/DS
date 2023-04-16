@@ -1,6 +1,6 @@
 ﻿#include "TaskDo.h"
-#include "TaskSmartalert.h"
-#include "TaskWebView.h"
+#include "TaskSmartAlertDialog.h"
+#include "TaskWebEngineView.h"
 #include "TaskBrowserMenu.h"
 #include "TaskFlow/pageCustomtaskFlow.h"
 #include "TaskFlow/pageCustomtaskFlowControl.h"
@@ -23,7 +23,7 @@
 #include <QTimer>
 #include <QsLog.h>
 
-TaskDo::TaskDo(QWidget *parent,MTask *task) : QWidget(parent),m_task(task){
+TaskDo::TaskDo(QWidget *parent,MTask *task) : QWidget(parent),mTask(task){
 
 
     boxLayout = new QVBoxLayout(this);
@@ -34,7 +34,7 @@ TaskDo::TaskDo(QWidget *parent,MTask *task) : QWidget(parent),m_task(task){
     boxLayout->addWidget(new ComLineWidget(this));
     initFlowUi();
     initBottomUi();
-    nameLine->setText(m_task->name);
+    nameLine->setText(mTask->name);
 
 }
 TaskDo::~TaskDo()
@@ -45,12 +45,12 @@ TaskDo::~TaskDo()
 }
 void TaskDo::startLoad(int msec){
     QTimer::singleShot(msec,this,[this](){
-        if(smartAlertView!=nullptr){
-            loadUrl(m_task->addressList[0]);
+        if(mSmartAlertDialog!=nullptr){
+            loadUrl(mTask->addressList[0]);
 
-            if(m_task->type==MTask::TASKTYPE::ADD){
+            if(mTask->type==MTask::TASKTYPE::ADD){
                 // 新增任务（默认新增第一步流程）
-                flow->fc->setFlowAddressList(m_task->addressList,true);
+                flow->fc->setFlowAddressList(mTask->addressList,true);
             }else{
                 // 编辑任务（反序列化任务流程图并复原）
                 flow->fc->deserialize();
@@ -65,6 +65,7 @@ void TaskDo::initTopMenuUi(){
 
     // 智能选项的智能菜单
     QMenu *tipMenu = new QMenu(this);
+    tipMenu->setStyleSheet(".QMenu{color:rgb(0,0,0);font-family:Microsoft YaHei;font-size:13px;border:1px solid rgb(64,65,66);border-radius: 3px; padding: 1px;}");
 
     QAction *pullA = tipMenu->addAction(tr("生成下拉刷新流程"));
     connect(pullA, &QAction::triggered, this,[this](){
@@ -101,13 +102,13 @@ void TaskDo::initTopMenuUi(){
 
         loadingLabel->show();
 
-        m_task->name = nameLine->text().trimmed();
-        emit this->notifyChangeTabName(m_task->name);
+        mTask->name = nameLine->text().trimmed();
+        emit this->notifyChangeTabName(mTask->name);
 
         flow->fc->serialize(); // 任务流程序列化
 
         QString msg;
-        bool state = Database::getInstance()->addTask(m_task,msg);
+        bool state = Database::getInstance()->addTask(mTask,msg);
         loadingLabel->hide();
         if(state){
             // 保存成功
@@ -130,11 +131,11 @@ void TaskDo::initTopMenuUi(){
 
 
         QString msg;
-        bool state = Database::getInstance()->addTask(m_task,msg);
+        bool state = Database::getInstance()->addTask(mTask,msg);
         loadingLabel->hide();
         if(state){
             // 保存成功->进入执行页面
-            StartupDialog *startup = new StartupDialog(new MTask(*m_task));
+            StartupDialog *startup = new StartupDialog(new MTask(*mTask));
             startup->setAttribute(Qt::WA_DeleteOnClose);
             startup->show();
         }else{
@@ -203,7 +204,7 @@ void TaskDo::initFlowUi(){
         flowLayout->setContentsMargins(0,0,0,0);
         flowLayout->setSpacing(0);
 
-        flow = new PageCustomTaskFlow(m_task,flowWidget);
+        flow = new PageCustomTaskFlow(mTask,flowWidget);
         ComSplitVWidget *splitVWidget = new ComSplitVWidget(flowWidget);
         splitVWidget->setFixedHeight(4);
 
@@ -276,7 +277,7 @@ void TaskDo::initBottomUi(){
 
     //第二行
     browserMenu = new TaskBrowserMenu(bottomWidget);
-    browserMenu->setFixedHeight(30);
+    browserMenu->setFixedHeight(40);
     browserMenu->hide();
 
     progressBar = new QProgressBar(bottomWidget);
@@ -285,7 +286,7 @@ void TaskDo::initBottomUi(){
     progressBar->setStyleSheet(QStringLiteral("QProgressBar {border: 0px} QProgressBar::chunk {background-color: #da4453}"));
 
     //第三行
-    webView = new TaskWebView(bottomWidget,m_task);
+    webView = new TaskWebEngineView(bottomWidget,mTask);
 
     bottomLayout->addWidget(bottomMenuWidget);
     bottomLayout->addWidget(new ComLineWidget(this));
@@ -294,7 +295,7 @@ void TaskDo::initBottomUi(){
 
     bottomLayout->addWidget(webView);
 
-    connect(webView, &TaskWebView::urlChanged, this, [this](const QUrl &url){
+    connect(webView, &TaskWebEngineView::urlChanged, this, [this](const QUrl &url){
          addrEdit->setText(url.url());
          addrEdit->setCursorPosition(0);
     });
@@ -317,14 +318,14 @@ void TaskDo::initBottomUi(){
 
         progressBar->setValue(0);
 
-        if(m_task->isHaveName==false){
+        if(mTask->isHaveName==false){
             // 首次赋予名字
             QString title = webView->title();
             if(title.length()>0){
-                m_task->name = title;
-                nameLine->setText(m_task->name);
-                m_task->isHaveName=true;
-                emit this->notifyChangeTabName(m_task->name);
+                mTask->name = title;
+                nameLine->setText(mTask->name);
+                mTask->isHaveName=true;
+                emit this->notifyChangeTabName(mTask->name);
             }
         }
     });
@@ -350,13 +351,13 @@ void TaskDo::initBottomUi(){
         //智能显示按钮
         if(isFirstShowSmartAlert){
             QPoint p = QCursor().pos();
-            smartAlertView->move(p.x()+25,p.y()+10);
+            mSmartAlertDialog->move(p.x()+25,p.y()+10);
             isFirstShowSmartAlert = false;
         }
         if(checked){
-            smartAlertView->show();
+            mSmartAlertDialog->show();
         }else{
-            smartAlertView->hide();
+            mSmartAlertDialog->hide();
         }
     });
 
@@ -365,8 +366,8 @@ void TaskDo::initBottomUi(){
 void TaskDo::initSmartAlertView(int msec){
     QTimer::singleShot(msec,this,[this](){
         if(flow!=nullptr){
-            smartAlertView = new TaskSmartalert(this,webView,flow->fc);
-            connect(smartAlertView,&TaskSmartalert::notifySmartAlertChecked,[this](bool checked){
+            mSmartAlertDialog = new TaskSmartAlertDialog(this,webView,flow->fc);
+            connect(mSmartAlertDialog,&TaskSmartAlertDialog::notifySmartAlertChecked,[this](bool checked){
                 if(checked&& smartAlertCheck->checkState()==Qt::CheckState::Checked){
                     // 显示命令 && 当前智能提示按钮显示选中 -> 则忽略
                 }else {
@@ -389,8 +390,8 @@ void TaskDo::loadUrl(QString url){
     webView->load(QUrl(url));
     if(smartAlertCheck->checkState()==Qt::CheckState::Checked){
         // 如果当前智能提示框被选中，则重置显示
-        if(smartAlertView!=nullptr){
-            smartAlertView->block();
+        if(mSmartAlertDialog!=nullptr){
+            mSmartAlertDialog->block();
         }
     }
 }

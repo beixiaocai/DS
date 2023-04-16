@@ -14,9 +14,9 @@
  */
 const QString HOST = "http://127.0.0.1:18000";
 const bool    IS_reportHeart = false;
-const QString URL_DOCUMENT = "https://gitee.com/Vanishi/DS/blob/master/README.md";// 文档
-const QString URL_FEEDBACK = "https://gitee.com/Vanishi/DS/issues"; // 反馈
-const QString URL_OPENSOURCE = "https://gitee.com/Vanishi/DS"; // 开源地址
+const QString URL_DOCUMENT = "https://github.com/any12345com/DS/blob/master/README.md";// 文档
+const QString URL_FEEDBACK = "https://github.com/any12345com/DS/issues"; // 反馈
+const QString URL_OPENSOURCE = "https://github.com/any12345com/DS"; // 开源地址
 
 
 const QString JS_QWEBCHANNEL_FILE = ":/res/js/lib/qwebchannel_release.js.txt";

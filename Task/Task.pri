@@ -7,17 +7,18 @@ HEADERS += \
     $$PWD/TaskDataDownloadManager.h \
     $$PWD/TaskDataMenuDialog.h \
     $$PWD/TaskManage.h \
-    $$PWD/TaskSmartalert.h \
-    $$PWD/TaskWebviewBridge.h \
+    $$PWD/TaskSmartAlertDialog.h \
     $$PWD/TaskBrowserMenu.h \
     $$PWD/mCustomtaskSmartalertClick.h \
     $$PWD/mCustomtaskSmartalertItem.h \
     $$PWD/mCustomtaskSmartalertSelectall.h \
     $$PWD/mCustomtaskSmartalertSuccess.h \
     $$PWD/mCustomtaskSmartalertXpath.h \
-    $$PWD/TaskWebview.h \
-    $$PWD/TaskWebpage.h \
-    $$PWD/TaskDataExport.h \
+    $$PWD/TaskWebEngineProfile.h \
+    $$PWD/TaskWebEngineBridge.h \
+    $$PWD/TaskWebEngineView.h \
+    $$PWD/TaskWebEnginePage.h \
+    $$PWD/TaskDataExportDialog.h \
     $$PWD/TaskImport.h
 
 SOURCES += \
@@ -28,17 +29,18 @@ SOURCES += \
     $$PWD/TaskDataDownloadManager.cpp \
     $$PWD/TaskDataMenuDialog.cpp \
     $$PWD/TaskManage.cpp \
-    $$PWD/TaskSmartalert.cpp \
-    $$PWD/TaskWebviewBridge.cpp \
+    $$PWD/TaskSmartAlertDialog.cpp \
     $$PWD/TaskBrowserMenu.cpp \
     $$PWD/mCustomtaskSmartalertClick.cpp \
     $$PWD/mCustomtaskSmartalertItem.cpp \
     $$PWD/mCustomtaskSmartalertSelectall.cpp \
     $$PWD/mCustomtaskSmartalertSuccess.cpp \
     $$PWD/mCustomtaskSmartalertXpath.cpp \
-    $$PWD/TaskWebview.cpp \
-    $$PWD/TaskWebpage.cpp \
-    $$PWD/TaskDataExport.cpp \
+    $$PWD/TaskWebEngineProfile.cpp \
+    $$PWD/TaskWebEngineBridge.cpp \
+    $$PWD/TaskWebEngineView.cpp \
+    $$PWD/TaskWebEnginePage.cpp \
+    $$PWD/TaskDataExportDialog.cpp \
     $$PWD/TaskImport.cpp
 
 

@@ -15,9 +15,11 @@
 #include <QTextEdit>
 #include <QLabel>
 #include <QTimer>
+#include <QsLog.h>
 
 Task::Task(QWidget *parent,MTask *task) : QWidget(parent),mTask(task)
 {
+     QLOG_INFO() << "Task::Task()";
      setAttribute(Qt::WA_StyledBackground,true);
      setStyleSheet(QString(".Task{background-color:%1;}").arg(m_rgb_basic));
 
@@ -54,6 +56,7 @@ Task::Task(QWidget *parent,MTask *task) : QWidget(parent),mTask(task)
     }
 }
 Task::~Task(){
+    QLOG_INFO() << "Task::~Task()";
     delete mTask;
     mTask = nullptr;
 

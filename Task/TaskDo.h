@@ -11,9 +11,9 @@ class QProgressBar;
 QT_END_NAMESPACE;
 
 class ComLoadingLabel;
-class TaskWebView;
+class TaskWebEngineView;
 class PageCustomTaskFlow;
-class TaskSmartalert;
+class TaskSmartAlertDialog;
 class TaskBrowserMenu;
 struct MTask;
 
@@ -28,7 +28,7 @@ public:
      void startLoad(int msec=50);
 
 private:
-    MTask *m_task;
+    MTask *mTask;
     QVBoxLayout *boxLayout;
 
     void initTopMenuUi();
@@ -47,8 +47,8 @@ private:
     QProgressBar *progressBar;
 
     TaskBrowserMenu *browserMenu;// 浏览模式的菜单
-    TaskWebView *webView;
-    TaskSmartalert *smartAlertView = nullptr;
+    TaskWebEngineView *webView;
+    TaskSmartAlertDialog *mSmartAlertDialog;
     void initSmartAlertView(int msec);
 
 

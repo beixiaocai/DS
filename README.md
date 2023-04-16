@@ -6,8 +6,9 @@
 * 作者主页：http://www.any12345.com/user/4
 * 作者哔哩哔哩主页：https://space.bilibili.com/487906612
 * 软件哔哩哔哩讲解视频：https://www.bilibili.com/video/BV1uM4y167bg/
-* 软件gitee开源地址：https://gitee.com/Vanishi/DS
 * 软件github开源地址：https://github.com/any12345com/DS
+* 软件gitee开源地址：https://gitee.com/Vanishi/DS
+* 历史版本介绍请看文件：version.json
 
 ### 软件介绍
 

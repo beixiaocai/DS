@@ -1,7 +1,7 @@
 ﻿#include "TaskManage.h"
 #include "TaskData.h"
 #include "TaskImport.h"
-#include "TaskDataExport.h"
+#include "TaskDataExportDialog.h"
 #include "Utils/models.h"
 #include "Utils/database.h"
 #include "Utils/ComLoadingLabel.h"
@@ -185,9 +185,9 @@ void TaskManage::initRowMenu(){
     });
     connect(exportdataA, &QAction::triggered, this,[this](){
         // 导出数据
-        TaskDataExport *exp = new TaskDataExport(this,mCurTask->name,mCurTask->code);
-        exp->setAttribute(Qt::WA_DeleteOnClose);
-        exp->show();
+        TaskDataExportDialog *dlg = new TaskDataExportDialog(this,mCurTask->name,mCurTask->code);
+        dlg->setAttribute(Qt::WA_DeleteOnClose);
+        dlg->show();
     });
 
 

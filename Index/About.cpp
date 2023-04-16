@@ -10,7 +10,6 @@
 #include <QDesktopServices>
 #include <QUrl>
 #include <QLabel>
-#include <QDebug>
 
 About::About(QWidget *parent) : QWidget(parent)
 {

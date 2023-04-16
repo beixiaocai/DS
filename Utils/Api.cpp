@@ -101,7 +101,7 @@ void Api::reportCrash(QString &crashMsg){
      * &productVersion=10"
      **/
 
-    QHash<QString,QString> params;
+
     QString logFile = QString("%1/logs/run.log").arg(QApplication::applicationDirPath());
 
     QFile logF(logFile);
@@ -109,7 +109,6 @@ void Api::reportCrash(QString &crashMsg){
 
     if(logF.exists()){
         if(logF.open(QIODevice::ReadOnly| QIODevice::Text)){
-            qDebug()<<"logF.size()="<<logF.size();
             QString line;
             int lineCount = 0;
             QQueue<QString> lineQ;
@@ -142,15 +141,17 @@ void Api::reportCrash(QString &crashMsg){
     //qDebug()<<"logFile="<<logFile;
     //qDebug()<<"logText="<<logText;
 
+    QJsonObject params;
+    params.insert("version",QCoreApplication::applicationVersion());
     params.insert("finger",Database::getInstance()->getFinger());
-    params.insert("bootUniqueId",QSysInfo::bootUniqueId());
+    params.insert("bootUniqueId",QString(QSysInfo::bootUniqueId()));
     params.insert("buildAbi",QSysInfo::buildAbi());
     params.insert("buildCpuArchitecture",QSysInfo::buildCpuArchitecture());
     params.insert("currentCpuArchitecture",QSysInfo::currentCpuArchitecture());
     params.insert("kernelType",QSysInfo::kernelType());
     params.insert("kernelVersion",QSysInfo::kernelVersion());
     params.insert("machineHostName",QSysInfo::machineHostName());
-    params.insert("machineUniqueId",QSysInfo::machineUniqueId());
+    params.insert("machineUniqueId",QString(QSysInfo::machineUniqueId()));
     params.insert("prettyProductName",QSysInfo::prettyProductName());
     params.insert("productType",QSysInfo::productType());
     params.insert("productVersion",QSysInfo::productVersion());
@@ -158,16 +159,16 @@ void Api::reportCrash(QString &crashMsg){
     params.insert("logFile",logFile);
     params.insert("logText",logText);
 
-    QString url = HOST+"/reportCrash?version="+QCoreApplication::applicationVersion();
-    QHash<QString,QString>::const_iterator it;
-    for (it=params.constBegin();it!=params.constEnd();++it) {
-        url +="&"+it.key()+"="+it.value();
-    }
+    QString url = HOST+"/reportCrash";
     QLOG_INFO() <<"Api::reportCrash url="<<url;
+    QByteArray data = QJsonDocument(params).toJson(QJsonDocument::Compact);
 
     QNetworkAccessManager manager;
     QEventLoop loop;
-    QNetworkReply *reply = manager.get(QNetworkRequest(url));
+    QUrl qurl(url);
+    QNetworkRequest request(qurl);
+    request.setRawHeader("Content-Type", "application/json");
+    QNetworkReply *reply = manager.post(request,data);
     connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);//请求结束并下载完成后，退出子事件循环
 //    QTimer::singleShot(3000, &loop, &QEventLoop::quit);// 3s超时
     loop.exec();

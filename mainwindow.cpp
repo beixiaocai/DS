@@ -1,9 +1,13 @@
 ﻿#include "mainwindow.h"
 #include "Tab.h"
-#include "Utils/database.h"
-#include "Task/TaskImport.h"
+#include "database.h"
+#include "TaskImport.h"
 #include "style.h"
 #include "constant.h"
+#include "Utils/models.h"
+#include "Utils/ApiCheckVersion.h"
+#include "Index/VersionDialog.h"
+#include "Task/TaskWebEngineProfile.h"
 #include <QDesktopServices>
 #include <QUrl>
 #include <QToolBar>
@@ -23,6 +27,7 @@
 #include <QNetworkProxy>
 #include <QScreen>
 #include <QRect>
+#include <QTimer>
 #include <QsLog.h>
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -43,14 +48,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QLOG_INFO() << "MainWindow::MainWindow() screens.size="<< screens.size()<<",screenW="<<screenW<<",screenH="<<screenH<<",initW="<<initW<<",initH="<<initH;
     this->resize(initW,initH);
-
+    //开启调试
 //    qputenv("QTWEBENGINE_REMOTE_DEBUGGING", "9223");
-
     // QtWebEngineProcess.exe与主进程合二为一
-//    qputenv("QTWEBENGINE_CHROMIUM_FLAGS", "--single-process");
+    //qputenv("QTWEBENGINE_CHROMIUM_FLAGS", "--single-process");
     //版本显示audio标签control控件高度异常 设置这样即可正常显示
 //    qputenv("QTWEBENGINE_CHROMIUM_FLAGS", "--disable-features=UseModernMediaControls");
-
     initMenu();
 
     tabWidget = new Tab(this);
@@ -59,11 +62,32 @@ MainWindow::MainWindow(QWidget *parent) :
     initSettings();
     tabWidget->createIndex();
 
+    connect(ApiCheckVersion::getInstance(),&ApiCheckVersion::notifyCheckVersion,this,&MainWindow::onCheckVersion);
+    QTimer::singleShot(2000,this,[](){
+        TaskWebEngineProfile::getInstance();
+        ApiCheckVersion::getInstance()->checkVersion();
+    });
+
 }
 MainWindow::~MainWindow(){
+    QLOG_INFO() << "MainWindow::~MainWindow()";
     Database::getInstance()->release();// 释放单例
-}
 
+}
+void MainWindow::onCheckVersion(bool state,QString &msg,MVersion &version){
+//    disconnect(ApiCheckVersion::getInstance(),&ApiCheckVersion::notifyCheckVersion,this,&MainWindow::onCheckVersion);
+    if(state){
+        float curVersion = QCoreApplication::applicationVersion().toFloat();
+        if(version.version > curVersion){
+//                VersionDialog *versionLog = new VersionDialog(this,version);
+//                versionLog->setAttribute(Qt::WA_DeleteOnClose);
+//                versionLog->show();
+            VersionDialog dlg(this,version);
+            dlg.exec();
+        }
+    }
+
+}
 void MainWindow::initMenu(){
     // 文件菜单
     QMenu *fileMenu = new QMenu(tr("文件"));
@@ -109,22 +133,23 @@ void MainWindow::initMenu(){
         tabWidget->createAbout();
     });
 
+    QAction *feedbackAct = helpMenu->addAction("反馈");
+    connect(feedbackAct, &QAction::triggered, this, []() {
+        QDesktopServices::openUrl(QUrl(URL_FEEDBACK));
+    });
 
     QAction *documentAct = helpMenu->addAction("文档");
     connect(documentAct, &QAction::triggered, this, []() {
         QDesktopServices::openUrl(QUrl(URL_DOCUMENT));
     });
-    QAction *feedbackAct = helpMenu->addAction("反馈");
-    connect(feedbackAct, &QAction::triggered, this, []() {
-        QDesktopServices::openUrl(QUrl(URL_FEEDBACK));
-    });
+
 
     QAction *logoutAct = helpMenu->addAction("退出");
     logoutAct->setShortcuts(QKeySequence::Quit);
     connect(logoutAct, &QAction::triggered, this, [this]() {
         switch (QMessageBox::information(this,"提示","确认要退出吗？","确定","取消",0)){
             case 0:{
-                QLOG_INFO() << "mainwindow.cpp: logout";
+                QLOG_INFO() << "logout";
                 QApplication* app;
                 app->quit();
                 break;
@@ -139,7 +164,6 @@ void MainWindow::initMenu(){
     helpMenu->addSeparator();
     helpMenu->addAction(documentAct);
     helpMenu->addSeparator();
-
     helpMenu->addAction(logoutAct);
 
 
@@ -152,7 +176,9 @@ void MainWindow::initSettings(){
 
     QSettings settings;
 
+
     if(settings.value(SETTINGS_KEY_OPEN_PROXY).toBool()){
+        QNetworkProxyFactory::setUseSystemConfiguration(false);
         QNetworkProxy networkProxy;
         networkProxy.setType(QNetworkProxy::HttpProxy);
         networkProxy.setHostName(settings.value(SETTINGS_KEY_PROXY_IP).toString());
@@ -166,7 +192,7 @@ void MainWindow::initSettings(){
         }
         QNetworkProxy::setApplicationProxy(networkProxy);
     }else{
-        QNetworkProxyFactory::setUseSystemConfiguration(false);
+        QNetworkProxyFactory::setUseSystemConfiguration(true);
     }
 
     QString finger;
@@ -178,5 +204,4 @@ void MainWindow::initSettings(){
     }
     Database::getInstance()->setFinger(finger);
 
-    QLOG_INFO() << "MainWindow::initSettings() finger="<< Database::getInstance()->getFinger();
 }

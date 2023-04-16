@@ -27,12 +27,17 @@ private:
     QPushButton    *leftDirectStartBtn;
     QPushButton    *leftTimedStartBtn;
 
+
     QStackedWidget *rightStackedWidget;
-    QWidget        *rightDirectStartWidget;
-    QWidget        *rightTimedStartWidget;
-    QCheckBox      *rightLoopCb; // 是否开启循环采集
-    QSpinBox       *rightLoopIntervalSpin;//循环间隔时长（单位分钟）
-    QSpinBox       *rightLoopSingleSpin;//单次运行时长（单位分钟）
+
+    QWidget        *rightDirectStartWidget;//直接启动
+    QCheckBox      *rightDirectTracelessBrowserCb;//直接启动是否开启无痕浏览器
+
+
+    QWidget        *rightTimedStartWidget;//定时启动
+    QCheckBox      *rightTimedTracelessBrowserCb;//定时启动是否开启无痕浏览器
+    QSpinBox       *rightTimedLoopIntervalSpin; //定时启动循环间隔时长（单位分钟）
+    QSpinBox       *rightTimedLoopSingleSpin;   //定时启动单次运行时长（单位分钟）
     void initLeftUi();
     void initRightDirectStartUi();
     void initRightTimedStartUi();

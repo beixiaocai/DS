@@ -5,10 +5,10 @@
 #include "Utils/ComLineWidget.h"
 #include "Utils/ComMessageBox.h"
 #include "TaskFlow/mFcModels.h"
-#include "Task/TaskDataExport.h"
+#include "Task/TaskDataExportDialog.h"
 #include "RunHelper.h"
-#include "RunWebview.h"
-#include "RunWebviewManager.h"
+#include "RunWebEngineView.h"
+#include "RunWebEngineViewManager.h"
 #include "RunThreadPipline.h"
 #include "style.h"
 #include <QVBoxLayout>
@@ -63,11 +63,11 @@ RunDialog::RunDialog(MTask *task) : QDialog(nullptr), mTask(task){
     initWebViewUi();
     initBottomUi();
 
-    mWebviewManager = new RunWebViewManager(this);//默认打开一个webview
+    mWebViewManager = new RunWebEngineViewManager(this);//默认打开一个webview
 //     默认加载 '打开网页'
     addrLine->setText(mTask->addressList[0]);
     addrLine->setCursorPosition(0);
-    mWebviewManager->getCurrentWebView()->load(QUrl(addrLine->text()));
+    mWebViewManager->getCurrentWebView()->load(QUrl(addrLine->text()));
 
 //    // 默认以数据库的字段显示
     mFields = Database::getInstance()->getTableFields(task->code);
@@ -106,9 +106,9 @@ RunDialog::~RunDialog(){
         delete mMessage;
         mMessage = nullptr;
     }
-    if(mWebviewManager){
-        delete mWebviewManager;
-        mWebviewManager = nullptr;
+    if(mWebViewManager){
+        delete mWebViewManager;
+        mWebViewManager = nullptr;
     }
     if(mTask){
         delete mTask;
@@ -197,17 +197,17 @@ void RunDialog::startOpenWeb(MFlowStepParamsOpenWeb *params){
      //    cookieStore->deleteAllCookies();
      //    cookieStore->setCookie(QNetworkCookie("a","b"),qurl);
      //    cookieStore->setCookie(QNetworkCookie("c","d"),qurl);
-         mWebviewManager->getCurrentWebView()->load(request);
+         mWebViewManager->getCurrentWebView()->load(request);
 
 
          QTimer *timer = new QTimer();
          connect(timer,&QTimer::timeout,this,[this,timer,params](){
-            if(mWebviewManager->pageIsFinished){
+            if(mWebViewManager->pageIsFinished){
                 timer->stop();
                 delete timer;
                 // 判断是否滚动
                 if(params->isRoll){
-                    mWebviewManager->getCurrentWebView()->page()->runJavaScript(QString("startRoll('%1','%2','%3')").arg(params->rollCount).arg(params->rollInterval).arg(params->rollTypeIndex),
+                    mWebViewManager->getCurrentWebView()->page()->runJavaScript(QString("startRoll('%1','%2','%3')").arg(params->rollCount).arg(params->rollInterval).arg(params->rollTypeIndex),
                                                                            [this,params](const QVariant &v) {
                           QString rf = v.toString();
                           if(rf.startsWith("success")){
@@ -287,7 +287,7 @@ void RunDialog::startClickEle(MFlowStepParamsClickEle *params){
            arg(iisLast).arg(params->isTurnPage);
 
         QTimer::singleShot(WAIT_SLEEP_UNIT*params->waitSleep,this,[this,script,params](){
-             mWebviewManager->getCurrentWebView()->page()->runJavaScript(script,[this,params](const QVariant &v) {
+             mWebViewManager->getCurrentWebView()->page()->runJavaScript(script,[this,params](const QVariant &v) {
                   QString feedback = v.toString();
                   QLOG_INFO() << QString("Run.cpp startClickEle() feedback=%1").arg(feedback);
 
@@ -313,7 +313,7 @@ void RunDialog::startClickEleRoll(MFlowStepParamsClickEle *params, QString feedb
           // 页面内下拉刷新
          if(params->isRoll){
 
-             mWebviewManager->getCurrentWebView()->page()->runJavaScript(QString("startRoll('%1','%2','%3')").arg(params->rollCount).arg(params->rollInterval).arg(params->rollTypeIndex),
+             mWebViewManager->getCurrentWebView()->page()->runJavaScript(QString("startRoll('%1','%2','%3')").arg(params->rollCount).arg(params->rollInterval).arg(params->rollTypeIndex),
                                                                     [this,params](const QVariant &v) {
                    QString rf = v.toString();
                    QLOG_INFO() << QString("Run.cpp startClickEleRoll() dropdown.rf=%1").arg(rf);
@@ -339,12 +339,12 @@ void RunDialog::startClickEleRoll(MFlowStepParamsClickEle *params, QString feedb
 
               QTimer *timer = new QTimer();
               connect(timer,&QTimer::timeout,this,[this,timer,params,clickNext](){
-                 if(mWebviewManager->pageIsFinished){
+                 if(mWebViewManager->pageIsFinished){
                      timer->stop();
                      delete timer;
 
                      if(params->isRoll){
-                         mWebviewManager->getCurrentWebView()->page()->runJavaScript(QString("startRoll('%1','%2','%3')").arg(params->rollCount).arg(params->rollInterval).arg(params->rollTypeIndex),
+                         mWebViewManager->getCurrentWebView()->page()->runJavaScript(QString("startRoll('%1','%2','%3')").arg(params->rollCount).arg(params->rollInterval).arg(params->rollTypeIndex),
                                                                                 [this,params,clickNext](const QVariant &v) {
                                QString rf = v.toString();
                                if(rf.startsWith("success")){
@@ -408,7 +408,7 @@ void RunDialog::startExtract(MFlowStepParamsExtract * params){
             arg(iloopTypeName).arg(iloopTypeValue).arg(inum).arg(params->isLoop).arg(params->carryFields);
 
     QTimer::singleShot(WAIT_SLEEP_UNIT*params->waitSleep,this,[this,script,params](){
-        mWebviewManager->getCurrentWebView()->page()->runJavaScript(script, [this,params](const QVariant &v) {
+        mWebViewManager->getCurrentWebView()->page()->runJavaScript(script, [this,params](const QVariant &v) {
              QString feedback = v.toString();
              if(feedback.startsWith("success")){
                  endExtract(params,feedback);
@@ -448,7 +448,7 @@ void RunDialog::startInput(MFlowStepParamsInput *params){
            arg(params->eleXpath).arg(params->inputText).arg(params->isLoop);
 
     QTimer::singleShot(WAIT_SLEEP_UNIT*params->waitSleep,this,[this,script,params](){
-        mWebviewManager->getCurrentWebView()->page()->runJavaScript(script,[this,params](const QVariant &v) {
+        mWebViewManager->getCurrentWebView()->page()->runJavaScript(script,[this,params](const QVariant &v) {
             QString feedback = v.toString();
             QLOG_INFO() << QString("Run.cpp startInput() feedback=%1").arg(feedback);
             if(feedback.startsWith("success")){
@@ -483,7 +483,7 @@ void RunDialog::startLoopHead(MFlowStepParamsLoop * params){
         // 固定 非固定循环
          QString script = QString("startLoopHead('%1','%2')").arg(params->loopTypeName,params->loopTypeValue);
          QTimer::singleShot(WAIT_SLEEP_UNIT*params->waitSleep,this,[this,params,script](){
-            mWebviewManager->getCurrentWebView()->page()->runJavaScript(script,[this,params](const QVariant &v) {
+            mWebViewManager->getCurrentWebView()->page()->runJavaScript(script,[this,params](const QVariant &v) {
                 QString feedback = v.toString();
                 QLOG_INFO() << QString("Run.cpp startLoopHead() feedback=%1").arg(feedback);
 
@@ -496,7 +496,7 @@ void RunDialog::startLoopHead(MFlowStepParamsLoop * params){
                     }
                     params->carryTotal = total;
                     params->carryCurrent = 1;
-                    params->carryCurrentWebView = mWebviewManager->getCurrentWebView();
+                    params->carryCurrentWebView = mWebViewManager->getCurrentWebView();
                     startNextStep(params->stepID);
                 }else{
                     sendStopJobCommand(RunMessage::MessageType::ERROR,"获取循环失败，请确认规则后重试！");
@@ -531,7 +531,7 @@ void RunDialog::startLoopTail(QString loopStepID,QString loopInnerLastStepID){
                            }
                        }
                 }else{
-                      emit mWebviewManager->cleanWebViews(ploop->carryCurrentWebView);
+                      emit mWebViewManager->cleanWebViews(ploop->carryCurrentWebView);
 
                       if(ploop->carryCurrent < ploop->carryTotal){
                           ploop->carryCurrent+=1;
@@ -584,7 +584,7 @@ void RunDialog::startMouse(MFlowStepParamsMouse *params){
            arg(params->eleXpath).arg(params->isLoop);
 
     QTimer::singleShot(WAIT_SLEEP_UNIT*params->waitSleep,this,[this,script,params](){
-        mWebviewManager->getCurrentWebView()->page()->runJavaScript(script,[this,params](const QVariant &v) {
+        mWebViewManager->getCurrentWebView()->page()->runJavaScript(script,[this,params](const QVariant &v) {
             QString feedback = v.toString();
             QLOG_INFO() << QString("Run.cpp startMouse() feedback=%1").arg(feedback);
 
@@ -645,7 +645,7 @@ void RunDialog::endClickEle(MFlowStepParamsClickEle * params,bool next ){
                     return ;
                 }
             }else {
-                emit mWebviewManager->cleanWebViews(ploop->carryCurrentWebView);
+                emit mWebViewManager->cleanWebViews(ploop->carryCurrentWebView);
                 if(ploop->carryCurrent<ploop->carryTotal){
                     ploop->carryCurrent+=1;
                     lastStepID = ploop->stepID;
@@ -681,7 +681,7 @@ void RunDialog::endExtract(MFlowStepParamsExtract * params,QString feedback){
                     return ;
                 }
             }else {
-                emit mWebviewManager->cleanWebViews(ploop->carryCurrentWebView);
+                emit mWebViewManager->cleanWebViews(ploop->carryCurrentWebView);
 
                 if(ploop->carryCurrent<ploop->carryTotal){
                     ploop->carryCurrent+=1;
@@ -715,7 +715,7 @@ void RunDialog::endInput(MFlowStepParamsInput *params){
                     return ;
                 }
             }else {
-                emit mWebviewManager->cleanWebViews(ploop->carryCurrentWebView);
+                emit mWebViewManager->cleanWebViews(ploop->carryCurrentWebView);
                 if(ploop->carryCurrent<ploop->carryTotal){
                     ploop->carryCurrent+=1;
                     lastStepID = ploop->stepID;
@@ -746,7 +746,7 @@ void RunDialog::endMouse(MFlowStepParamsMouse *params){
                     return ;
                 }
             }else {
-                emit mWebviewManager->cleanWebViews(ploop->carryCurrentWebView);
+                emit mWebViewManager->cleanWebViews(ploop->carryCurrentWebView);
 
                 if(ploop->carryCurrent<ploop->carryTotal){
                     ploop->carryCurrent+=1;
@@ -864,7 +864,7 @@ void RunDialog::onThreadPiplineUpdateData(int num,QStringList names,QStringList 
     values.clear();
 
 }
-void RunDialog::onCleanWebViews(RunWebView *webView){
+void RunDialog::onCleanWebViews(RunWebEngineView *webView){
     addrLine->setText(webView->url().url());
 
     int wl = webViewStacked->count();
@@ -917,7 +917,7 @@ void RunDialog::initTopMenuUi(){
 
     connect(refreshBtn,&QPushButton::clicked,this,[this](){
         if(mThreadPipline->jobFinished){
-             mWebviewManager->getCurrentWebView()->load(QUrl(addrLine->text().trimmed()));
+             mWebViewManager->getCurrentWebView()->load(QUrl(addrLine->text().trimmed()));
 
         }else{
             ComMessageBox::error(this,"任务执行中，无法刷新");
@@ -1114,9 +1114,9 @@ void RunDialog::initBottomUi(){
         });
     }
     connect(exportBtn,&QPushButton::clicked,this,[this](){
-        TaskDataExport *exp = new TaskDataExport(this,mTask->name,mTask->code);
-        exp->setAttribute(Qt::WA_DeleteOnClose);
-        exp->show();
+        TaskDataExportDialog *dlg = new TaskDataExportDialog(this,mTask->name,mTask->code);
+        dlg->setAttribute(Qt::WA_DeleteOnClose);
+        dlg->show();
     });
 
     connect(stopBtn ,&QPushButton::clicked,this,[this](){

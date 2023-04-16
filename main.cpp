@@ -1,33 +1,19 @@
 ﻿#include "mainwindow.h"
 #include "ComMessageBox.h"
 #include "Api.h"
+#include "Utils.h"
 #include <QApplication>
 #include <QSharedMemory>
-#include <QFile>
-#include <QDir>
 #include <windows.h>
-#include <QsLog.h>
 #include <QDate>
+#include <qtwebenginecoreglobal.h>
+#include <QsLog.h>
 #include <QDebug>
 using namespace  QsLogging;
 
-bool mkDirs(QString dirPath)
-{
-    QDir dir(dirPath);
-    if(dir.exists())
-    {
-      return true;
-    }
-    else
-    {
-       bool result = dir.mkpath(dirPath);//创建多级目录
-       return result;
-    }
-}
-
 void initLogger(const QString &logDir){
 
-    if(mkDirs(logDir)){
+    if(Utils::mkDirs(logDir)){
         Logger& logger = Logger::instance();
         logger.setLoggingLevel(QsLogging::TraceLevel);
         //    QString timeStr = QDate::currentDate().toString("yyyy-MM-dd");
@@ -45,28 +31,6 @@ void initLogger(const QString &logDir){
         QLOG_INFO()<<"initLogger() error logDir="<<logDir;
     }
 
-}
-void cleanLogDir(const QString &logDir){
-
-    QDir dir(logDir);
-    if(!dir.exists()){
-        return ;
-    }
-    dir.setFilter(QDir::Files | QDir::Hidden | QDir::NoSymLinks);
-    dir.setSorting(QDir::Size | QDir::Reversed);
-    QFileInfoList list = dir.entryInfoList();
-    for (int i = 0; i < list.size(); ++i){
-        QFileInfo fileInfo = list.at(i);
-        QString filename =fileInfo.fileName();
-        if(filename.size() > 10){
-            QDateTime time = QDateTime::fromString(filename.mid(0,10),"yyyy-MM-dd");
-            if(time.toSecsSinceEpoch() > 0){
-                //此前遗留的日志文件，删除
-                fileInfo.dir().remove(fileInfo.absoluteFilePath());
-            }
-        }
-
-    }
 }
 
 LONG ApplicationCrashHandler(EXCEPTION_POINTERS *pException){
@@ -88,7 +52,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationName("any12345");
     QCoreApplication::setOrganizationDomain("www.any12345.com");
     QCoreApplication::setApplicationName("DS");
-    QCoreApplication::setApplicationVersion("1.6");
+    QCoreApplication::setApplicationVersion("1.7");
 
     SetUnhandledExceptionFilter((LPTOP_LEVEL_EXCEPTION_FILTER)ApplicationCrashHandler);//注冊异常捕获函数
 
@@ -118,11 +82,17 @@ int main(int argc, char *argv[])
     // 获取程序当前地址，需要在QApplication初始化之后获取，否则获取的地址错误
 //    QString logDir = QDir::homePath()+"/AppData/Local/DS/logs";
     QString logDir = QApplication::applicationDirPath() + "/logs";
-//    cleanLogDir(logDir);
+//    Utils::clearLogDir(logDir);
     initLogger(logDir);
 
-    QLOG_INFO()<< "DS V"+QCoreApplication::applicationVersion()+"  Start";
+    QString vInfo = QString("DS V%1,qwebengine V%2 chromium V%3 chromiumSP V%4").
+            arg(QCoreApplication::applicationVersion()).
+            arg(qWebEngineVersion()).
+            arg(qWebEngineChromiumVersion()).
+            arg(qWebEngineChromiumSecurityPatchVersion());
 
+    qDebug()<< vInfo;
+    QLOG_INFO()<< vInfo;
 
     MainWindow mainWindow;
     mainWindow.show();

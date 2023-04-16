@@ -18,8 +18,8 @@ QT_END_NAMESPACE;
 class RunThreadPipline;
 class RunHelper;
 class MFlowStepParams;
-class RunWebViewManager;
-class RunWebView;
+class RunWebEngineViewManager;
+class RunWebEngineView;
 
 class MFlowStepParamsOpenWeb;
 class MFlowStepParamsClickEle;
@@ -68,7 +68,7 @@ private:
     RunThreadPipline *mThreadPipline;
     RunHelper *mHelper;
     RunMessage *mMessage;
-    RunWebViewManager *mWebviewManager;
+    RunWebEngineViewManager *mWebViewManager;
 
     void startNextStep(QString lastStepID);
 
@@ -108,7 +108,7 @@ public slots:
     void onThreadPiplineAlert(int type,QString info);
 
     void onWebViewUrlChanged(const QString &url);
-    void onCleanWebViews(RunWebView *webView);//切换显示中的webView（不需要同步执行切换）
+    void onCleanWebViews(RunWebEngineView *webView);//切换显示中的webView（不需要同步执行切换）
 
 
 };

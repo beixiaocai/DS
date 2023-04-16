@@ -80,7 +80,7 @@ void ApiCheckVersion::onRequestFinished(QNetworkReply *reply){
 
 }
 
-void ApiCheckVersion::asyncCheckVersion(){
+void ApiCheckVersion::checkVersion(){
 
     QHash<QString,QString> params;
     params.insert("finger",Database::getInstance()->getFinger());
@@ -102,7 +102,7 @@ void ApiCheckVersion::asyncCheckVersion(){
     for (it=params.constBegin();it!=params.constEnd();++it) {
         url +="&"+it.key()+"="+it.value();
     }
-    QLOG_INFO() <<"ApiCheckVersion::asyncCheckVersion url="<<url;
+    QLOG_INFO() <<"ApiCheckVersion::checkVersion url="<<url;
 
     QUrl qurl(url);
     QNetworkRequest request(qurl);

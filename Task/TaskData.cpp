@@ -1,5 +1,5 @@
 ﻿#include "TaskData.h"
-#include "TaskDataExport.h"
+#include "TaskDataExportDialog.h"
 #include "TaskDataMenuDialog.h"
 #include "Utils/database.h"
 #include "Utils/ComLoadingLabel.h"
@@ -263,9 +263,9 @@ void TaskData::initBottomUi(){
     exportBtn->setFixedSize(100,28);
 
     connect(exportBtn,&QPushButton::clicked,this,[this](){
-        TaskDataExport *exp = new TaskDataExport(this,mTaskName,mTaskCode);
-        exp->setAttribute(Qt::WA_DeleteOnClose);
-        exp->show();
+        TaskDataExportDialog *dlg = new TaskDataExportDialog(this,mTaskName,mTaskCode);
+        dlg->setAttribute(Qt::WA_DeleteOnClose);
+        dlg->show();
     });
 
     turnHLayout->addWidget(pageLogLabel);

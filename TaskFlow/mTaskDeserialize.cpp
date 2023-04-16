@@ -11,9 +11,10 @@ MTaskDeserialize::MTaskDeserialize(const QString &program,QObject *parent) : QOb
         MFlowStepParams *params = steps[i];
 
         if(params->menuType==MCONSTANT_FLOW_MENU_TYPE_ExtractBtn){
-             MFlowStepParamsExtract * pe= static_cast<MFlowStepParamsExtract *>(params);
+             MFlowStepParamsExtract *stepParams = static_cast<MFlowStepParamsExtract *>(params);
+
              qDebug()<<QString("step = %1 ").arg(i)<<params->carryStepLocation<<params->name<<params->stepID<<params<<params->carryParent
-                    <<"提取字段深度=="<<pe->carryDeep;
+                    <<"提取字段深度=="<<stepParams->carryDeep;
 
         }else {
 

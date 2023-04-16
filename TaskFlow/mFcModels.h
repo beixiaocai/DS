@@ -7,7 +7,7 @@ class QWidget;
 class QVBoxLayout;
 QT_END_NAMESPACE;
 
-class RunWebView;
+class RunWebEngineView;
 
 //分割重点说明： 如某个参数类型，其对象有多个则属性使用*分割，如某个属性是一个集合，集合内是另外一个类型，则集合内的每一个对象之间使用&分割。而集合内每一个对象的属性之间仍然使用*分割
 const QString SEPARATOR_1 = "*";//对象内，属性与属性之间的参数分割符号
@@ -256,7 +256,7 @@ public:
     int carryAddressTotal=0;
 
     // 固定不固定循环使用
-    RunWebView *carryCurrentWebView;
+    RunWebEngineView *carryCurrentWebView;
     int carryTotal = 0;
     int carryCurrent = 0;
 

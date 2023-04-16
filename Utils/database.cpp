@@ -430,6 +430,8 @@ QString Database::getRandomUserAgent(){
 }
 void Database::setFinger(const QString &finger){
     m_finger = finger;
+    QLOG_INFO() << "Database::setFinger finger="<< Database::getInstance()->getFinger();
+
 }
 QString Database::getFinger() const{
     return m_finger;
