@@ -1,18 +1,29 @@
 ﻿# DS
 
 * 作者：北小菜 
-* QQ群：529336606
+* QQ：1402990689
 * 邮箱：bilibili_bxc@126.com
 * 作者主页：http://www.any12345.com/user/4
 * 作者哔哩哔哩主页：https://space.bilibili.com/487906612
-* 软件哔哩哔哩讲解视频：https://www.bilibili.com/video/BV1uM4y167bg/
-* 软件github开源地址：https://github.com/any12345com/DS
+* 作者头条主页：https://www.ixigua.com/home/4171970536803763
 * 软件gitee开源地址：https://gitee.com/Vanishi/DS
+* 软件github开源地址：https://github.com/any12345com/DS
 * 历史版本介绍请看文件：version.json
 
 ### 软件介绍
 
 - 这是一个Qt开发的可以替代爬虫的网页数据采集软件，它最重要的特点就是，降低了采集网页数据的门槛，由至少掌握一门编程语言降低到只要会操作电脑即可。
+
+### 软件的使用教程
+
+* [头条视频-开源一个Qt开发的可以替代爬虫的网页数据采集软件](https://www.ixigua.com/7251409919918899764)
+* [头条视频-兼容Qt6.4.3，Chromium内核升级至最新，预计性能提升20%](https://www.ixigua.com/7251410733408191032?id=7251778324991738429)
+* [头条视频-【网页数据采集工具DS】1分钟实现循环翻页采集招聘数据](https://www.ixigua.com/7251410733408191032?id=7252343778143535628)
+* [头条视频-【网页数据采集工具DS】1分钟实现列表页循环跳详情页采集商品](https://www.ixigua.com/7251410733408191032?id=7254895583918457381)
+* [头条视频-【网页数据采集工具DS】1分钟实现下拉刷新采集榜单数据](https://www.ixigua.com/7251410733408191032?id=7254897905675600439)
+
+* [哔哩哔哩视频-开源一个Qt开发的可以替代爬虫的网页数据采集软件](https://www.bilibili.com/video/BV1uM4y167bg)
+
 
 ### 关于DS
 - DS名称出自于Data Spider 英文缩写，我几年前写过一个类似的工具软件，但当时受限于个人水平，那个软件在逻辑上存在许多难以在逾越的bug，所以一直都搁置了。
