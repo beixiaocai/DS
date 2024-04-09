@@ -22,10 +22,10 @@ private:
     QString mTaskCode;
     QVBoxLayout *boxLayout;
     QCheckBox *xlsxCb;
-    QCheckBox *fileCb;
+    QCheckBox *csvCb;
 
-    QLabel    *unitLabel;
-    QSpinBox  *unitSpin;
+    QLabel    *remarkLabel;
+    QSpinBox  *remarkSpin;
     QString mSaveDir;//保存文件路径
 
     QLabel          *loadingMsgLabel;
@@ -33,6 +33,7 @@ private:
 
 private:
     void exportXlsx();
+    void exportCsv();
 
 signals:
 

@@ -49,10 +49,10 @@ LONG ApplicationCrashHandler(EXCEPTION_POINTERS *pException){
 
 int main(int argc, char *argv[])
 {
-    QCoreApplication::setOrganizationName("any12345");
-    QCoreApplication::setOrganizationDomain("www.any12345.com");
+    QCoreApplication::setOrganizationName("beixiaocai");
+    QCoreApplication::setOrganizationDomain("ds.beixiaocai.com");
     QCoreApplication::setApplicationName("DS");
-    QCoreApplication::setApplicationVersion("1.7");
+    QCoreApplication::setApplicationVersion("1.9");
 
     SetUnhandledExceptionFilter((LPTOP_LEVEL_EXCEPTION_FILTER)ApplicationCrashHandler);//注冊异常捕获函数
 

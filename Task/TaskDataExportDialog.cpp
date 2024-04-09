@@ -43,31 +43,31 @@ TaskDataExportDialog::TaskDataExportDialog(QWidget *parent,const QString &taskNa
     xlsxCb->setText("Excel(xlsx)");
     xlsxCb->setChecked(true);
 
-    fileCb = new QCheckBox(optionsBox->gWidget);
-    fileCb->setText("文件");
+    csvCb = new QCheckBox(optionsBox->gWidget);
+    csvCb->setText("CSV(csv)");
 
 
     optionsBox->gLayout->addWidget(xlsxCb,optionsBox->rowStart,0);
-    optionsBox->gLayout->addWidget(fileCb,optionsBox->rowStart,1);
+    optionsBox->gLayout->addWidget(csvCb,optionsBox->rowStart,1);
     ++optionsBox->rowStart;
 
      // 选择导出方式end
 
     //每一个sheet的最大长度 start
-    unitLabel = new QLabel(optionsBox->gWidget);
-    unitLabel->setStyleSheet(m_stylesheet_QLabel);
-    unitLabel->setText("每一个sheet的最大长度");
+    remarkLabel = new QLabel(optionsBox->gWidget);
+    remarkLabel->setStyleSheet(m_stylesheet_QLabel);
+    remarkLabel->setText("每一个sheet的最大长度");
 
-    unitSpin = new QSpinBox(optionsBox->gWidget);
-    unitSpin->setMinimum(4000);
-    unitSpin->setMaximum(5000);
-//    unitSpin->setSuffix("");
-    unitSpin->setMaximumWidth(160);
-    unitSpin->setStyleSheet(m_stylesheet_QSpinBox);
-    unitSpin->setValue(10);
+    remarkSpin = new QSpinBox(optionsBox->gWidget);
+    remarkSpin->setMinimum(4000);
+    remarkSpin->setMaximum(5000);
+//    remarkSpin->setSuffix("");
+    remarkSpin->setMaximumWidth(160);
+    remarkSpin->setStyleSheet(m_stylesheet_QSpinBox);
+    remarkSpin->setValue(10);
 
-    optionsBox->gLayout->addWidget(unitLabel,optionsBox->rowStart,0);
-    optionsBox->gLayout->addWidget(unitSpin,optionsBox->rowStart,1);
+    optionsBox->gLayout->addWidget(remarkLabel,optionsBox->rowStart,0);
+    optionsBox->gLayout->addWidget(remarkSpin,optionsBox->rowStart,1);
     ++optionsBox->rowStart;
 
     //每一个sheet的最大长度 end
@@ -118,21 +118,22 @@ TaskDataExportDialog::TaskDataExportDialog(QWidget *parent,const QString &taskNa
 
     connect(xlsxCb,&QCheckBox::clicked,this,[this](bool checked){
         if(checked){
-            unitLabel->setText("每一个sheet的最大长度");
-            fileCb->setChecked(false);
+            remarkLabel->setText("每一个sheet的最大长度");
+            remarkSpin->show();
+            csvCb->setChecked(false);
         }else{
-            fileCb->setChecked(true);
+            csvCb->setChecked(true);
         }
      });
-    connect(fileCb,&QCheckBox::clicked,this,[this](bool checked){
+    connect(csvCb,&QCheckBox::clicked,this,[this](bool checked){
         if(checked){
-            unitLabel->setText("每一个文件的最大长度");
+            remarkLabel->setText("csv文件无sheet长度限制");
+            remarkSpin->hide();
             xlsxCb->setChecked(false);
         }else{
             xlsxCb->setChecked(true);
         }
      });
-
 
     connect(okBtn,&QPushButton::clicked,this,[this](){
         if(mSaveDir.isEmpty()){
@@ -141,8 +142,8 @@ TaskDataExportDialog::TaskDataExportDialog(QWidget *parent,const QString &taskNa
         }
         if(xlsxCb->isChecked()){
             exportXlsx();
-        }else if(fileCb->isChecked()){
-            ComMessageBox::error(this,"暂不支持文件导出格式");
+        }else if(csvCb->isChecked()){
+            exportCsv();
         }else{
             ComMessageBox::error(this,"不支持的导出格式");
         }
@@ -178,67 +179,128 @@ TaskDataExportDialog::~TaskDataExportDialog(){
     QLOG_INFO() <<"TaskDataExportDialog::~TaskDataExportDialog()";
 }
 
+void TaskDataExportDialog::exportCsv(){
+    loadingLabel->show();
+    loadingMsgLabel->setText("");
+
+    QTimer::singleShot(200,[this](){
+
+        // 查询数据
+        QStringList fields = Database::getInstance()->getTableFields(mTaskCode);
+        int queryColumnCount = fields.length();
+
+        int pageSize = 30;// 每页查询数据的数量
+        int pageStart = 0;// 本页查询起始点
+        int totalCount = 0;// 当前数据总长度
+
+        QString csvPath = QString("%1/%2-%3.csv").
+               arg(mSaveDir).
+               arg(QDateTime::currentDateTime().toLocalTime().toString("yyyyMMddhhmm")).
+               arg(mTaskName);
+
+        QFile csv(csvPath);
+        if(!csv.open(QIODevice::WriteOnly | QIODevice::Text))
+        {
+            qDebug()<<"选择导出csv的文件无法写入";
+            ComMessageBox::error(this,"选择导出csv的文件无法写入");
+            return ;
+        }
+        QTextStream csvStream(&csv);  //创建一个文本流，向保存文件中写入文本
+        for (int column = 1; column <= queryColumnCount; ++column) {
+            csvStream<<fields[column-1]<<",";
+        }
+        csvStream<<"\n";
+
+        while (true) {
+            QVector<QVector<QString>> data = Database::getInstance()->select(queryColumnCount,
+                    QString("select %1 from %2 limit %3,%4 ").arg(fields.join(",")).arg(mTaskCode).arg(pageStart).arg(pageSize)
+                 );
+
+            for (int d = 0; d < data.length(); ++d) {
+                totalCount +=1;
+                for (int column = 1; column <= queryColumnCount; ++column) {
+                    QString val = data[d][column-1];
+                    val.replace("\n"," ");
+                    val.replace(","," ");
+                    csvStream<<val<<",";
+                }
+                csvStream<<"\n";
+            }
+            if(data.length()<pageSize){
+                break;
+            }else{
+                pageStart +=pageSize;
+            }
+        }
+
+        csv.close();
+
+        loadingLabel->hide();
+        loadingMsgLabel->setText(QString("导出完成（共计%1条数据）").arg(totalCount));
+    });
+}
 
 void TaskDataExportDialog::exportXlsx(){
-    if(!mSaveDir.isEmpty()){
-        // 执行导出文件
-        loadingLabel->show();
-        loadingMsgLabel->setText("");
-        QTimer::singleShot(200,[this](){
-            int sheetSize = unitSpin->value();
-            // 查询数据
-            QStringList fields = Database::getInstance()->getTableFields(mTaskCode);
-            int queryColumnCount = fields.length();
+    // 执行导出文件
+    loadingLabel->show();
+    loadingMsgLabel->setText("");
 
-            int dbsize = 30;// 每页查询数据的数量
-            int dbstart = 0;// 本页查询起始点
-            int dbtotal = 0;// 当前数据库总数量
+    QTimer::singleShot(200,[this](){
+        int sheetDataMaxRow = remarkSpin->value();//每一个sheet中最大行数
+        // 查询数据
+        QStringList fields = Database::getInstance()->getTableFields(mTaskCode);
+        int queryColumnCount = fields.length();
 
-            int sheetNum = 1; // 起始sheet
-            int sheetRow = 1; //当前sheet起始行
+        int pageSize = 30;// 每页查询数据的数量
+        int pageStart = 0;// 本页查询起始点
+        int totalCount = 0;// 当前数据总长度
 
-            Document xlsx;
-            xlsx.addSheet("sheet"+QString::number(sheetNum));
-            xlsx.setColumnWidth(1,queryColumnCount,20);
+        int sheetNum = 1; // 起始sheet
+        int sheetDataRow = 1; //当前sheet的数据行
 
-            for (int column = 1; column <= queryColumnCount; ++column) {
-                xlsx.write(sheetRow,column,fields[column-1]);
-            }
+        Document xlsx;
+        xlsx.addSheet("sheet"+QString::number(sheetNum));
+        xlsx.setColumnWidth(1,queryColumnCount,20);
 
-            while (true) {
-                QVector<QVector<QString>> data = Database::getInstance()->select(queryColumnCount,
-                        QString("select %1 from %2 limit %3,%4 ").arg(fields.join(",")).arg(mTaskCode).arg(dbstart).arg(dbsize)
-                     );
-                for (int d = 0; d < data.length(); ++d) {
-                    dbtotal +=1;
-                    sheetRow +=1;
-                    for (int column = 1; column <= queryColumnCount; ++column) {
-                        xlsx.write(sheetRow,column,data[d][column-1]);
-                    }
-                    if(sheetRow % sheetSize == 0){
-                        sheetNum +=1;
-                        sheetRow = 0;
-                        xlsx.addSheet("sheet"+QString::number(sheetNum));
-                        xlsx.setColumnWidth(1,queryColumnCount,40);
-                    }
+        sheetDataRow+=1;
+        for (int column = 1; column <= queryColumnCount; ++column) {
+            xlsx.write(sheetDataRow,column,fields[column-1]);
+        }
+
+        while (true) {
+            QVector<QVector<QString>> data = Database::getInstance()->select(queryColumnCount,
+                    QString("select %1 from %2 limit %3,%4 ").arg(fields.join(",")).arg(mTaskCode).arg(pageStart).arg(pageSize)
+                 );
+
+            for (int d = 0; d < data.length(); ++d) {
+                totalCount +=1;
+                sheetDataRow +=1;
+                for (int column = 1; column <= queryColumnCount; ++column) {
+                    xlsx.write(sheetDataRow,column,data[d][column-1]);
                 }
-                if(data.length()<dbsize){
-                    break;
-                }else{
-                    dbstart +=dbsize;
+                if(sheetDataRow % sheetDataMaxRow == 0){
+                    sheetNum +=1;
+                    sheetDataRow = 0;
+                    xlsx.addSheet("sheet"+QString::number(sheetNum));
+                    xlsx.setColumnWidth(1,queryColumnCount,40);
                 }
             }
-            QString filename = QString("%1/%2-%3.xlsx").
-                   arg(mSaveDir).
-                   arg(mTaskName).
-                   arg(QDateTime::currentDateTime().toLocalTime().toString("yyyyMMddhhmm"));
+            if(data.length()<pageSize){
+                break;
+            }else{
+                pageStart +=pageSize;
+            }
+        }
 
-            loadingLabel->hide();
-            xlsx.saveAs(filename);
-            loadingMsgLabel->setText(QString("导出完成（共计%1条数据）").arg(dbtotal));
+        QString filePath = QString("%1/%2-%3.xlsx").
+               arg(mSaveDir).
+               arg(QDateTime::currentDateTime().toLocalTime().toString("yyyyMMddhhmm")).
+               arg(mTaskName);
+        xlsx.saveAs(filePath);
 
+        loadingLabel->hide();
+        loadingMsgLabel->setText(QString("导出完成（共计%1条数据）").arg(totalCount));
 //           this->close();
-        });
-    }
+    });
 
 }

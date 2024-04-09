@@ -22,6 +22,7 @@ RunWebEngineViewManager::RunWebEngineViewManager(RunDialog *runDialog) : QObject
     QLOG_INFO()<<"RunWebEngineViewManager::RunWebEngineViewManager()";
     this->mHelper = runDialog->getHelper();
 
+
     if(mHelper->getTask()->runParams.isTraceless){//开启无痕浏览器模式
         mProfile = new QWebEngineProfile(this);
         mProfile->setHttpCacheType(QWebEngineProfile::HttpCacheType::NoCache);
@@ -44,7 +45,7 @@ RunWebEngineViewManager::RunWebEngineViewManager(RunDialog *runDialog) : QObject
     mProfile->scripts()->insert(script);
     QWebEngineSettings *settings = mProfile->settings();
 
-    settings->setAttribute(QWebEngineSettings::LocalStorageEnabled, false); //关闭缓存
+//    settings->setAttribute(QWebEngineSettings::LocalStorageEnabled, false); //关闭缓存
     settings->setAttribute(QWebEngineSettings::AllowRunningInsecureContent,mHelper->getTask()->isBrowserAllowRunningInsecureContent);
     settings->setAttribute(QWebEngineSettings::AutoLoadImages,mHelper->getTask()->isBrowserAutoLoadImages);
     settings->setAttribute(QWebEngineSettings::AutoLoadIconsForPage,mHelper->getTask()->isBrowserAutoLoadIconsForPage);

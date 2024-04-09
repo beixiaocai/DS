@@ -13,7 +13,8 @@ TaskWebEngineProfile::TaskWebEngineProfile(QObject *parent) : QObject(parent)
 {
     //  setZoomFactor(zoomFactor() - 0.3);
 //    mProfile =new QWebEngineProfile(this);
-//    mProfile =  QWebEngineProfile::defaultProfile();
+    mProfile =  QWebEngineProfile::defaultProfile();
+/*
     mCacheName = QString::fromLatin1("ChromiumV%1").arg(qWebEngineChromiumVersion());
     mProfile = new QWebEngineProfile(mCacheName,this);
 //    QString cachePath = "/file";
@@ -24,7 +25,10 @@ TaskWebEngineProfile::TaskWebEngineProfile(QObject *parent) : QObject(parent)
 
     mCachePath = mProfile->persistentStoragePath();
 //    mProfile->setHttpCacheMaximumSize(102400);
+    qDebug() <<"TaskWebEngineProfile cachePath()="<<mCachePath;
     QLOG_INFO() <<"TaskWebEngineProfile cachePath()="<<mCachePath;
+*/
+
 
     QWebEngineSettings *settings = mProfile->settings();
     settings->setAttribute(QWebEngineSettings::LocalStorageEnabled, true);

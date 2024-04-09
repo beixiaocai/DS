@@ -49,9 +49,9 @@ MainWindow::MainWindow(QWidget *parent) :
     QLOG_INFO() << "MainWindow::MainWindow() screens.size="<< screens.size()<<",screenW="<<screenW<<",screenH="<<screenH<<",initW="<<initW<<",initH="<<initH;
     this->resize(initW,initH);
     //开启调试
-//    qputenv("QTWEBENGINE_REMOTE_DEBUGGING", "9223");
+//    qputenv("QTWEBENGINE_REMOTE_DEBUGGING", "11124");
     // QtWebEngineProcess.exe与主进程合二为一
-    //qputenv("QTWEBENGINE_CHROMIUM_FLAGS", "--single-process");
+//    qputenv("QTWEBENGINE_CHROMIUM_FLAGS", "--single-process");
     //版本显示audio标签control控件高度异常 设置这样即可正常显示
 //    qputenv("QTWEBENGINE_CHROMIUM_FLAGS", "--disable-features=UseModernMediaControls");
     initMenu();
@@ -75,6 +75,8 @@ MainWindow::~MainWindow(){
 
 }
 void MainWindow::onCheckVersion(bool state,QString &msg,MVersion &version){
+    //qDebug()<<"MainWindow::onCheckVersion state="<<state<<",msg="<<msg<<",version.version="<<version.version;
+
 //    disconnect(ApiCheckVersion::getInstance(),&ApiCheckVersion::notifyCheckVersion,this,&MainWindow::onCheckVersion);
     if(state){
         float curVersion = QCoreApplication::applicationVersion().toFloat();

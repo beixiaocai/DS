@@ -12,20 +12,20 @@
   大家在二次开发的时候，完全可以忽略接口的存在，因为这并不会影响功能的使用。
  *
  */
-const QString HOST = "http://127.0.0.1:18000";
-const bool    IS_reportHeart = false;
-const QString URL_DOCUMENT = "https://github.com/any12345com/DS/blob/master/README.md";// 文档
-const QString URL_FEEDBACK = "https://github.com/any12345com/DS/issues"; // 反馈
-const QString URL_OPENSOURCE = "https://github.com/any12345com/DS"; // 开源地址
 
+const QString HOST = "http://www.beixiaocai.com:18000";
+const bool    IS_reportHeart = true;
+
+const QString URL_DOCUMENT = "http://www.beixiaocai.com/docs/ds";// 文档
+const QString URL_FEEDBACK = "http://www.beixiaocai.com/feedback"; // 反馈
+const QString URL_OPENSOURCE = "https://gitee.com/Vanishi/DS"; // 开源地址
 
 const QString JS_QWEBCHANNEL_FILE = ":/res/js/lib/qwebchannel_release.js.txt";
-
 const QString JS_CUSTOMTASK_FILE = ":/res/js/customtask.js.txt";
 const QString JS_EXECUTE_FILE = ":/res/js/execute.js.txt";
 
-//const QString JS_CUSTOMTASK_FILE = "D:\\DS\\static\\test\\customtask.js";
-//const QString JS_EXECUTE_FILE = "D:\\DS\\static\\test\\execute.js";
+//const QString JS_CUSTOMTASK_FILE = "D:\\Project\\DS\\static\\test\\customtask.js";
+//const QString JS_EXECUTE_FILE = "D:\\Project\\DS\\static\\test\\execute.js";
 
 const QString SETTINGS_KEY_FINGER= "settings_finger";// 唯一指纹
 const QString SETTINGS_KEY_OPEN_PROXY= "settings_open_proxy";// 是否开启代理
